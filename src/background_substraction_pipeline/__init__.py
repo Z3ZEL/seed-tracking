@@ -19,9 +19,7 @@ class BackgroundSubstractionPipeline(Processor):
         '''
         
         ##Initializing the processor
-        self.backgroundSubstractor = cv2.createBackgroundSubtractorMOG2()
-        self.notCalibrated = True
-
+        self.backgroundSubstractor = cv2.createBackgroundSubtractorMOG2(varThreshold=32)
 
 
         ##Building our processing pipeline
@@ -29,15 +27,14 @@ class BackgroundSubstractionPipeline(Processor):
             
             GrayScaleLayer(**kwargs),
             BackgroundRemovalLayer(self.backgroundSubstractor, **kwargs),
-            ContrastLayer(alpha=4, **kwargs),
-            ThresholdLayer(threshold=30, **kwargs),
+            ContrastLayer(alpha=2, **kwargs),
+            ThresholdLayer(threshold=50, **kwargs),
             BlurLayer(kernel_size=5, **kwargs),
             MergeShapeLayer(**kwargs)
 
         ])
+
+        
     
     def process(self, image: ndarray) -> ndarray:
-        if self.notCalibrated:
-            self.backgroundSubstractor.apply(image)
-            self.notCalibrated = False
         return super().process(image)

@@ -12,7 +12,6 @@ def extract_digit(x):
 
 def load_images(dirPath):
     dir = os.listdir(dirPath)
-    print(dir)
     dir.sort(key=lambda x: extract_digit(x))
 
     images = []
@@ -23,3 +22,9 @@ def load_images(dirPath):
 
     print("load ", len(images), " images")
     return images
+
+def save_images(dirPath, images):
+    os.makedirs(dirPath, exist_ok=True)
+    for i, img in enumerate(images):
+        cv2.imwrite(dirPath + "/image" + str(i) + ".jpg", img)
+    print("save ", len(images), " images")

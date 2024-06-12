@@ -13,7 +13,8 @@ __pycache__/
 
 # C extensions
 *.so
-data/
+data*/
+output*/
 # Distribution / packaging
 .Python
 build/
