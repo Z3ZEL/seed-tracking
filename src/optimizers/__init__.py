@@ -1,5 +1,5 @@
 from optimizers.smooth_optimizer import SmoothOptimizer as SmoothOptimizer
-from lib.image_processing.optimizer import Optimizer, Processor
+from interfaces.image_processing.optimizer import Optimizer, Processor
 
 
 class OptimizerApplier:

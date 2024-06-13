@@ -1,4 +1,4 @@
-from lib.image_processing import Optimizer, Processor
+from interfaces.image_processing import Optimizer, Processor
 
 import numpy as np
 

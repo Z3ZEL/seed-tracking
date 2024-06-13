@@ -1,4 +1,4 @@
-import lib.image_processing as ip
+import interfaces.image_processing as ip
 
 import numpy as np
 import cv2

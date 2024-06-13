@@ -1,4 +1,4 @@
-from lib.image_processing import ProcessingLayer
+from interfaces.image_processing import ProcessingLayer
 
 import numpy as np
 import cv2

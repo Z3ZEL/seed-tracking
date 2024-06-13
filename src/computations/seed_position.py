@@ -1,4 +1,4 @@
-from lib.image_computing import ImageComputer
+from interfaces.image_computing import ImageComputer
 import numpy as np
 import cv2
 class SeedPosition(ImageComputer):

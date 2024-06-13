@@ -1,5 +1,5 @@
 from numpy import ndarray
-from lib.image_processing import Processor
+from interfaces.image_processing import Processor
 import cv2
 ### Importing layer
 from background_substraction_pipeline.layers.grayscale_layer import GrayScaleLayer

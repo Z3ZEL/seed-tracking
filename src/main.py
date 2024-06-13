@@ -44,7 +44,7 @@ def main():
         y_max = ims[0].shape[0]
         plt.xlim(0, x_max)
         plt.ylim(0, y_max)
-        
+
         plt.plot(x, y, 'ro')
         plt.show()
 
