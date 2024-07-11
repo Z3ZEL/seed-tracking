@@ -1,1 +1,2 @@
 from computations.seed_position import SeedPosition as SeedPosition
+from computations.triangulate_position import TriangulatePosition as TriangulatePosition
