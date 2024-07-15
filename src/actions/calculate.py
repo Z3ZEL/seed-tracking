@@ -6,6 +6,7 @@ from common_layers import UndistortLayer
 from resource_manager import load_camera_configuration
 from interfaces.numerical_computing.velocity_computer import VelocityComputer
 from interfaces.image_computing.image_computer import ImageComputer
+from interfaces.numerical_computing.data_cleaner import DataCleaner
 from importlib import import_module
 import cv2,os
 import re
@@ -137,7 +138,15 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     print(f"Found {len(s_saveIms)} seeds for slave")
 
 
- 
+    ## Cleaning dataset
+
+    print("Cleaning dataset")
+    data_cleaner_algorithm = import_module("computations."+config['seed_computing']['seed_position_data_cleaner_algorithm'])
+    algoritm_param = config['seed_computing']['seed_position_data_cleaner_params'] if 'seed_position_data_cleaner_params' in config['seed_computing'] else {}
+    data_cleaner : DataCleaner = data_cleaner_algorithm.Computer(**algoritm_param)
+
+    m_savePos, s_savePos = data_cleaner.compute(m_savePos, s_savePos)
+    
     
 
     ## Compute a mean of X of both master and slave to provide a reference for the other when triangulating

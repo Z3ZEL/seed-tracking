@@ -46,12 +46,12 @@ def test_case(zip_path):
 
     info = parse_test_file(f"test/temp/{zip_name}/test")   
 
-    m_computed, s_computed = calculate_real_world_position(m_paths, s_paths, CONFIG, **kwargs)
+    m_computed, s_computed = calculate_real_world_position(m_paths, s_paths, CONFIG, **kwargs | {"dry_run":True})
     
     
     
     
-    velocity = calculate_velocity(m_computed, s_computed, CONFIG, **kwargs)
+    velocity = calculate_velocity(m_computed, s_computed, CONFIG, **kwargs | {"dry_run":True})
     
     silencer_deactivate()
 

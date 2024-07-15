@@ -3,6 +3,7 @@ import cv2
 import args
 import resource_manager 
 config = resource_manager.CONFIG
+import matplotlib.pyplot as plt
 
 
 def get_highest_number(directory):
@@ -22,6 +23,37 @@ def get_highest_number(directory):
 
     return highest_number
 
+def plot_seed_positions(m_computed, s_computed):
+    import matplotlib.dates as mdates
+    from datetime import datetime
+
+    # Example m_computed data structure: [(timestamp1, y1), (timestamp2, y2), ...]
+    # Convert timestamps to datetime objects if they're not already
+    m_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in m_computed]
+    s_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in s_computed]
+
+    # Extracting timestamps and y positions
+    m_timestamps = [item[0] for item in m_computed_plot]
+    m_y_positions = [item[1] for item in m_computed_plot]
+    s_timestamps = [item[0] for item in s_computed_plot]
+    s_y_positions = [item[1] for item in s_computed_plot]
+
+    # Plotting
+    plt.figure(figsize=(10, 6))
+    plt.plot(m_timestamps, m_y_positions, 'o-', label='Computed Y Position')
+    plt.plot(s_timestamps, s_y_positions, 'x-', label='Computed Y Position')
+
+    # Formatting the plot
+    plt.xlabel('Timestamp')
+    plt.ylabel('Y Position')
+    plt.title('Computed Y Position Over Time')
+    plt.legend()
+
+    # Improve formatting of timestamps on the x-axis
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
+    plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
+    plt.gcf().autofmt_xdate()
+
 
 def main():
     kwargs = vars(args.parse_args())
@@ -35,7 +67,13 @@ def main():
         from camera import camera_test
         camera_test()
         exit(0)
-
+    if(kwargs['clean']):
+        import os
+        folder = config["master_camera"]["temp_directory"]
+        for filename in os.listdir(folder):
+            if filename.endswith('.jpg'):
+                os.remove(os.path.join(folder, filename))
+        exit(0)
     if(kwargs["shot"] == "single"):
         import time,os, socket
         from actions.single_shot import shot, send_shot, fetch_shot
@@ -142,36 +180,7 @@ def main():
         m_computed, s_computed = calculate_real_world_position(m_paths, s_paths, config, **kwargs)
 
         if kwargs['plot']:
-            import matplotlib.pyplot as plt
-            import matplotlib.dates as mdates
-            from datetime import datetime
-
-            # Example m_computed data structure: [(timestamp1, y1), (timestamp2, y2), ...]
-            # Convert timestamps to datetime objects if they're not already
-            m_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in m_computed]
-            s_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in s_computed]
-
-            # Extracting timestamps and y positions
-            m_timestamps = [item[0] for item in m_computed_plot]
-            m_y_positions = [item[1] for item in m_computed_plot]
-            s_timestamps = [item[0] for item in s_computed_plot]
-            s_y_positions = [item[1] for item in s_computed_plot]
-
-            # Plotting
-            plt.figure(figsize=(10, 6))
-            plt.plot(m_timestamps, m_y_positions, 'o-', label='Computed Y Position')
-            plt.plot(s_timestamps, s_y_positions, 'x-', label='Computed Y Position')
-
-            # Formatting the plot
-            plt.xlabel('Timestamp')
-            plt.ylabel('Y Position')
-            plt.title('Computed Y Position Over Time')
-            plt.legend()
-
-            # Improve formatting of timestamps on the x-axis
-            plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
-            plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
-            plt.gcf().autofmt_xdate()
+            plot_seed_positions(m_computed, s_computed)
 
         velocity, error = calculate_velocity(m_computed, s_computed, config, **kwargs)
 
@@ -185,7 +194,50 @@ def main():
         exit(0)
 
             
+    if kwargs['run']:
+        import time, os, socket
+        from actions.multiple_shot_libcamera import shot, fetch_shot, send_shot
+        
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        
+        number = int(input("Enter an ID number"))
+        
+        input("Input press enter to start multiple shot")
+        start_timestamp = time.time_ns() + 3*10**9
+        end_timestamp = start_timestamp + 2*10**9 # last 2 seconds
 
+        send_shot(sock, start_timestamp, end_timestamp, config, suffix=number)
+
+        m_paths = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
+
+        time.sleep(0.5)
+
+        s_paths = fetch_shot(config, number)
+
+        print(f"Took {len(m_paths)} pics from the master cam and {len(s_paths)} from the slave cam")
+        
+        m_paths = sorted(m_paths)
+        s_paths = sorted(s_paths)
+
+        from actions.calculate import calculate_real_world_position, calculate_velocity
+
+        m_computed, s_computed = calculate_real_world_position(m_paths, s_paths, config, **kwargs)
+
+        if kwargs['plot']:
+            plot_seed_positions(m_computed, s_computed)
+
+        velocity, error = calculate_velocity(m_computed, s_computed, config, **kwargs)
+
+        print(f"Estimated velocity : {round(velocity,3)} m/s +- {round(error,3)} m/s")
+
+
+
+
+        if(kwargs['dry_run']):
+            print("Deleting images")
+            for path in m_paths + s_paths:
+                os.remove(path)
+        exit(0)
 
 if __name__ == '__main__':
     main()

@@ -11,6 +11,8 @@ PARSER.add_argument("--calibrate", type=str, help="Enter in calibration mode, yo
 PARSER.add_argument("--check-calibration", action="store_true", help="Launch the calibration check tool, add -p (--plot) option to activate the realtime testing", required=False, default=False, dest="check_calibrate")
 PARSER.add_argument("--camera-test", action="store_true", help="Launch a camera test given its configuration to check its performance", dest="camera_test", default=False, required=False)
 PARSER.add_argument("--calculate", action="store_true", help="Launch the seed velocity calculation depending on -i image separated by coma, master and slave. -o for output result", dest="calculate", default=False, required=False)
+PARSER.add_argument("--run", "-r", action="store_true", help="Run a speed recording, it includes the shooting and the calculation of the seed speed", required=False, default=False)
+PARSER.add_argument("-c","--clean", action="store_true", help="Clean the output folder", required=False, default=False)
 def parse_args():
     return PARSER.parse_args()
 

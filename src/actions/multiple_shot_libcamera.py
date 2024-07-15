@@ -113,6 +113,7 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix=""):
     os.remove(video_path)
     os.remove(metadata_path)
     
+    time.sleep(0.5)
 
     return paths
 
