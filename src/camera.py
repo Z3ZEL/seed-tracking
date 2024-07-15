@@ -6,7 +6,8 @@ import time
 import cv2 as cv
 from libcamera import controls
 from resource_manager import CONFIG
-
+import argparse
+import imutils
 ## PROCESSOR ###
 from interfaces.image_processing import Processor
 from common_layers import ResizeLayer, RotationLayer
@@ -29,6 +30,7 @@ config = picam2.create_video_configuration({"size": res},lores={"size": res},con
 picam2.align_configuration(config)
 picam2.configure(config)
 picam2.start()
+
 picam2.set_controls(camera_conf["controls"] | {"AfMode" : controls.AfModeEnum.Continuous})
 
 s=picam2.stream_configuration("lores")["stride"]
@@ -71,21 +73,35 @@ class _GrayBuffer(_MappedBuffer):
 def make_gray_buffer(request):
     return _GrayBuffer(request,"lores").make_gray()
 
-def camera_capture():
+
+def _camera_capture_buffered_request():
+    '''
+        First version of the camera capture using request and buffered threaded processing 
+        the most accurate way to get the timestamp
+    '''
     request = picam2.capture_request()
     frame=make_gray_buffer(request)
     ts=SYSTEM_BOOTED + request.get_metadata()['SensorTimestamp']
     request.release()
     return (frame.reshape((h,s)),ts)
+
+
     
 
+
+
+
+
+def camera_capture():
+    return _camera_capture_buffered_request()
+    
 
 def camera_test():
     last_time=time.time()
     last_count=0
     count=0
     gray = None
-    last_counter = 3
+    last_counter = 5
     while last_counter > 0:
         t0=time.time()
         count=count+1
@@ -94,8 +110,4 @@ def camera_test():
             last_count=count
             last_time=t0
             last_counter -= 1
-        gray = camera_capture()[0]  
-    
-    cv.imshow("gray", gray)
-    cv.waitKey(5000)
-    cv.destroyAllWindows()
+        gray = camera_capture()[0]

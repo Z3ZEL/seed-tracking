@@ -114,7 +114,10 @@ def stereo_camera_calibration(c1_images, c2_images, mtx1, dist1, mtx2, dist2, si
 def copy_image_array(arr):
     return [img.copy() for img in arr]
 
-def calibrate(master_camera_files:str, slave_camera_files:str, config:dict, dry_run:bool, plot:bool):
+def calibrate(master_camera_files:str, slave_camera_files:str, config:dict, dry_run:bool, plot:bool, flag:str):
+    stereo = "all" in flag or "stereo" in flag
+    single = "all" in flag or "single" in flag
+    
     m_images_names = sorted(glob.glob(master_camera_files))
     s_images_names = sorted(glob.glob(slave_camera_files))
     m_images = []
@@ -136,18 +139,28 @@ def calibrate(master_camera_files:str, slave_camera_files:str, config:dict, dry_
     columns = int(checkerboard_size[1])
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.1)
 
+    if single:
+        print("Calibrating Master Camera ...")
+        ret1, mtx1, dist1 = single_camera_calibration(copy_image_array(m_images), m_images_names, (rows,columns), config["square_size"], criteria, (5,5), plot)
+        print("RMSE Master Camera : ", ret1)
+        print("Calibrating Slave Camera ...")
+        ret2, mtx2, dist2 = single_camera_calibration(copy_image_array(s_images), s_images_names, (rows,columns), config["square_size"], criteria, (5,5), plot) 
+        print("RMSE Slave Camera : ", ret2)
+    else:
+        print("Loading camera matrixs and dists")
+        from resource_manager import extract_matrix_and_dist, CONFIG
+        if not CONFIG["calibration_data"]:
+            print("! No camera configurations were found in the config file, have you run single camera calibration ?")
+            exit(1)
+        
+        mtx1, dist1 = extract_matrix_and_dist(CONFIG["calibration_data"]["m_cam"])
+        mtx2, dist2 = extract_matrix_and_dist(CONFIG["calibration_data"]["s_cam"])
 
-    print("Calibrating Master Camera ...")
-    ret1, mtx1, dist1 = single_camera_calibration(copy_image_array(m_images), m_images_names, (rows,columns), config["square_size"], criteria, (5,5), plot)
-    print("RMSE Master Camera : ", ret1)
-    print("Calibrating Slave Camera ...")
-    ret2, mtx2, dist2 = single_camera_calibration(copy_image_array(s_images), s_images_names, (rows,columns), config["square_size"], criteria, (5,5), plot) 
-    print("RMSE Slave Camera : ", ret2)
-
-    print("Starting stereo calibrating ...")
-    
-    ret,  mtx1, dist1, mtx2, dist2, R, T = stereo_camera_calibration(copy_image_array(m_images), copy_image_array(s_images), mtx1, dist1, mtx2, dist2, (rows,columns), config["square_size"], criteria, (5,5), plot)
-    print("Stereo RMSE : ", ret)
+    if stereo:
+        print("Starting stereo calibrating ...")
+        
+        ret,  mtx1, dist1, mtx2, dist2, R, T = stereo_camera_calibration(copy_image_array(m_images), copy_image_array(s_images), mtx1, dist1, mtx2, dist2, (rows,columns), config["square_size"], criteria, (5,5), plot)
+        print("Stereo RMSE : ", ret)
 
     print("------ RESULT ------")
 
@@ -165,25 +178,27 @@ def calibrate(master_camera_files:str, slave_camera_files:str, config:dict, dry_
     print("Camera Matrix")
     print(mtx2)
     print()
-
     print("Distorsion Coeff")
     print(dist2)
     print()
 
+    if stereo:
 
-    print("Rotation Matrix")
-    print(R)
-    print()
-    print("Translation Vector")
-    print(T)
+        print("Rotation Matrix")
+        print(R)
+        print()
+        print("Translation Vector")
+        print(T)
 
     if plot:
         cv.destroyAllWindows()
 
     if not dry_run:
+        input("Press Enter to save, Ctrl-C to exit")
+
         with open("config.json", "r") as file:
             config = json.load(file)
-            config["calibration_data"] = {
+            config["calibration_data"] = config["calibration_data"] | {
                 "m_cam": {
                     "mtx": mtx1.tolist(),
                     "dist": dist1.tolist(),
@@ -192,9 +207,11 @@ def calibrate(master_camera_files:str, slave_camera_files:str, config:dict, dry_
                     "mtx": mtx2.tolist(),
                     "dist": dist2.tolist()
                 },
-                "R": R.tolist(),
-                "T": T.tolist()
             }
+            if stereo:
+                config["calibration_data"]["R"] = R
+                config["calibration_data"]["T"] = T
+            
             with open("config.json", "w") as file:
                 file.write(json.dumps(config))
         print("Config saved !")

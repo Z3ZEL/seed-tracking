@@ -27,6 +27,9 @@ def main():
     kwargs = vars(args.parse_args())
     print(kwargs)
     plot = kwargs["plot"]
+    verbose = kwargs["verbose"]
+    if verbose:
+        kwargs["show"] = True
 
     if(kwargs['camera_test']):
         from camera import camera_test
@@ -80,14 +83,14 @@ def main():
         exit(0)
     if(kwargs["shot"] == "multiple"):
         import time, os, socket
-        from actions.multiple_shot import shot, fetch_shot, send_shot
+        from actions.multiple_shot_libcamera import shot, fetch_shot, send_shot
         
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         
         number = int(time.time())
         
         input("Input press enter to start multiple shot")
-        start_timestamp = time.time_ns() + 2*10**9
+        start_timestamp = time.time_ns() + 3*10**9
         end_timestamp = start_timestamp + 2*10**9 # last 2 seconds
 
         send_shot(sock, start_timestamp, end_timestamp, config, suffix=number)
@@ -107,7 +110,11 @@ def main():
             for path in m_paths + s_paths:
                 os.remove(path)
         exit(0)
+    if(kwargs["shot"] == 'stress'):
+        from camera import camera_test
 
+        camera_test()
+        
     if(kwargs['calibrate']):
         from actions.calibrate import calibrate
 
@@ -116,7 +123,7 @@ def main():
             print("Error : you must provide two directories to --input separated by comma, the first for the master camera , the second for the slave")
             exit(1)
         
-        calibrate(dirs[0], dirs[1], config["calibration"],kwargs["dry_run"], plot)
+        calibrate(dirs[0], dirs[1], config["calibration"],kwargs["dry_run"], plot, kwargs['calibrate'])
         exit(0)
 
     if(kwargs['check_calibrate']):
@@ -125,7 +132,7 @@ def main():
         exit(0)
     
     if kwargs['calculate']:
-        from actions.calculate import calculate_real_world_position
+        from actions.calculate import calculate_real_world_position, calculate_velocity
         import glob
         import numpy as np
        
@@ -166,14 +173,8 @@ def main():
             plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
             plt.gcf().autofmt_xdate()
 
+        velocity, error = calculate_velocity(m_computed, s_computed, config, **kwargs)
 
-        from interfaces.numerical_computing.velocity_computer import VelocityComputer
-        from importlib import import_module
-        
-        velocity_algorithm = import_module("computations."+config['seed_computing']['velocity_algorithm'])
-        ransac : VelocityComputer = velocity_algorithm.Computer(**kwargs)
-
-        velocity, error = ransac.compute(m_computed, s_computed)
 
         print(f"Estimated velocity : {round(velocity,3)} m/s +- {round(error,3)} m/s")
 

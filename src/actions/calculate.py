@@ -1,10 +1,12 @@
 from background_substraction_pipeline import BackgroundSubstractionPipeline
-from computations import SeedPosition, TriangulatePosition
+from computations import TriangulatePosition
 from optimizers import SmoothOptimizer, OptimizerApplier
 from interfaces.image_processing import Processor
 from common_layers import UndistortLayer
 from resource_manager import load_camera_configuration
-
+from interfaces.numerical_computing.velocity_computer import VelocityComputer
+from interfaces.image_computing.image_computer import ImageComputer
+from importlib import import_module
 import cv2,os
 import re
 import numpy as np
@@ -16,13 +18,15 @@ def extract_timestamp(filename):
 
     # Utiliser re.search pour trouver la correspondance
     match = re.search(pattern, filename)
-
     # Vérifier si une correspondance a été trouvée et extraire le timestamp
     if match:
         timestamp = match.group(1)
         return int(timestamp)
     else:
         return None
+
+def extract_id(filename):
+    return filename.split('_')[-1].split(".")[0]
     
 
 def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
@@ -36,14 +40,19 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     Returns:
         list: List of computed real world position for the master camera.
     '''
+    ## Arg
+    verbose = kwargs["verbose"]
     ## Calculation number
-    id = random.randint(0, 1000)
+    
     ## Pipeline for master and slave
     m_background_substractor = BackgroundSubstractionPipeline(**kwargs)
     s_background_substractor = BackgroundSubstractionPipeline(**kwargs)
 
     ## Computer objects
-    seedPosition = SeedPosition(**kwargs)
+
+    ##Import the seed position computer
+    seedposition_algorithm = import_module("computations."+config['seed_computing']['seed_position_algorithm'])
+    seedPosition = seedposition_algorithm.Computer(**kwargs)
 
     # Import image
     m_imgs, s_imgs = [cv2.imread(im_path) for im_path in m_paths], [cv2.imread(im_path) for im_path in s_paths]
@@ -55,7 +64,7 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     s_img_datas = list(map(lambda name : (name, extract_timestamp(name)), s_img_datas))
 
     print(f"Found {len(m_imgs)} for master and {len(s_imgs)} for slave")
-
+    id = extract_id(m_img_datas[0][0])
     print("Loading camera configuration")
 
     mtx1, dist1, mtx2, dist2, R, T = load_camera_configuration()
@@ -68,18 +77,16 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
 
     m_imgs = [m_preprocessor.process(im) for im in m_imgs]
     s_imgs = [s_preprocessor.process(im) for im in s_imgs]
-    
-
-
 
     
     #Apply the optimizers
+    print("Optimizing master...")
     OptimizerApplier([
-        SmoothOptimizer(image_set = m_imgs, iteration=4, kernel_size=5)
+        SmoothOptimizer(image_set = m_imgs, iteration=2, kernel_size=5)
     ]).apply(m_background_substractor)
-
+    print("Optimizing slave...")
     OptimizerApplier([
-        SmoothOptimizer(image_set = s_imgs, iteration=4, kernel_size=5)
+        SmoothOptimizer(image_set = s_imgs, iteration=2, kernel_size=5)
     ]).apply(s_background_substractor)
 
 
@@ -88,7 +95,10 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     m_savePos = []
 
     for im, data in zip(m_imgs, m_img_datas):
+        if verbose:
+            print("Processing ", data[0])
         ## Remove the background
+        
         out = m_background_substractor.process(im)
         ## Compute the seed position
         pos = seedPosition.compute(out)
@@ -223,3 +233,12 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     print(s_computed)
 
     return m_computed, s_computed
+
+def calculate_velocity(m_computed, s_computed, config, **kwargs):
+        
+    ##Import velocity computer
+    velocity_algorithm = import_module("computations."+config['seed_computing']['velocity_algorithm'])
+    ransac : VelocityComputer = velocity_algorithm.Computer(**kwargs)
+    velocity, error = ransac.compute(m_computed, s_computed)
+
+    return velocity, error

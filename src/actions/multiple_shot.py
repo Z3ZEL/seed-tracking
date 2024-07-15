@@ -33,6 +33,8 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix=""):
 
     return img_paths
 
+
+
 def send_shot(sock, start_timestamp, end_timestamp, config, suffix=""):
     message = ("multiple" + ":" + str(start_timestamp) + ":" + str(end_timestamp) + ":" + str(suffix)).encode('utf-8')
     sock.sendto(message, (config["slave_camera"]["camera_address"], config["socket_port"]))

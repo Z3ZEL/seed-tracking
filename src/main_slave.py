@@ -4,8 +4,8 @@ import os
 import shutil
 
 from resource_manager import CONFIG
-from actions.single_shot import shot
-from actions.multiple_shot import shot as multiple_shot
+# from actions.single_shot import shot
+from actions.multiple_shot_libcamera import shot as multiple_shot
 
 # Adresse IP et port de l'esclave
 esclave_ip = ''
@@ -39,7 +39,7 @@ while True:
                 shutil.rmtree(outputdir)
                 os.makedirs(outputdir)
             
-            shot(outputdir, int(timestamp),prefix="s",suffix=number)
+            # shot(outputdir, int(timestamp),prefix="s",suffix=number)
 
             time.sleep(0.5)
         elif mode == "multiple":

@@ -28,8 +28,8 @@ class BackgroundSubstractionPipeline(Processor):
             GrayScaleLayer(**kwargs),
             BackgroundRemovalLayer(self.backgroundSubstractor, **kwargs),
             ContrastLayer(alpha=2, **kwargs),
-            ThresholdLayer(threshold=50, **kwargs),
             BlurLayer(kernel_size=5, **kwargs),
+            ThresholdLayer(threshold=180, **kwargs),
             MergeShapeLayer(**kwargs)
 
         ])
