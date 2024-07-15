@@ -3,7 +3,9 @@ import cv2
 import time
 import json
 import numpy as np
+import args
 CONFIG={}
+
 with open("config.json", "r") as file:
     CONFIG = json.load(file)
 
@@ -72,3 +74,6 @@ def save_images(dirPath, images, timestamp=False):
         digit = str(i) if not(timestamp) else time.time()
         cv2.imwrite(dirPath + "/image" + str(digit) + ".jpg", img)
     print("save ", len(images), " images")
+
+def is_master():
+    return args.is_master()

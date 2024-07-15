@@ -3,7 +3,7 @@ import argparse
 PARSER = argparse.ArgumentParser(description='SeedTracker')
 PARSER.add_argument('-i', '--input', type=str, required=False, default='data', help='Input folder containing the images')
 PARSER.add_argument( '--dry-run', action='store_true', required=False, default=False, help='No data saving', dest='dry_run')
-PARSER.add_argument('-o', '--output', type=str, required=False, default='output', help='Output folder to save the images')
+# PARSER.add_argument('-o', '--output', type=str, required=False, default='output', help='Output folder to save the images')
 PARSER.add_argument("-p", "--plot", action='store_true', help="Show whatever the process has to show", required=False, default=False)
 PARSER.add_argument("-v", "--verbose", action="store_true", help="Verbose all transformations, pipeline etc...", required=False, default=False)
 PARSER.add_argument( "--shot", type=str, help="Enter in dual shot mode", required=False, dest='shot')
@@ -13,6 +13,7 @@ PARSER.add_argument("--camera-test", action="store_true", help="Launch a camera 
 PARSER.add_argument("--calculate", action="store_true", help="Launch the seed velocity calculation depending on -i image separated by coma, master and slave. -o for output result", dest="calculate", default=False, required=False)
 PARSER.add_argument("--run", "-r", action="store_true", help="Run a speed recording, it includes the shooting and the calculation of the seed speed", required=False, default=False)
 PARSER.add_argument("-c","--clean", action="store_true", help="Clean the output folder", required=False, default=False)
+PARSER.add_argument("-s", "--slave", action="store_true", help="Launch the CLI in slave mode", required=False, default=False)
 def parse_args():
     return PARSER.parse_args()
 
@@ -21,3 +22,6 @@ def get_input_folder():
 
 def get_output_folder():
     return parse_args().output
+
+def is_master():
+    return not(parse_args().slave)

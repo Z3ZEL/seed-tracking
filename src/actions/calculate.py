@@ -54,8 +54,9 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
 
     ##Import the seed position computer
     seedposition_algorithm = import_module("computations."+config['seed_computing']['seed_position_algorithm'])
+    params = config["seed_computing"]["seed_position_algorithm_params"]
     
-    seedPosition : ImageComputer = seedposition_algorithm.Computer(**kwargs)
+    seedPosition : ImageComputer = seedposition_algorithm.Computer(**params)
 
     # Import image
     m_imgs, s_imgs = [cv2.imread(im_path) for im_path in m_paths], [cv2.imread(im_path) for im_path in s_paths]
@@ -67,6 +68,8 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     s_img_datas = list(map(lambda name : (name, extract_timestamp(name)), s_img_datas))
 
     print(f"Found {len(m_imgs)} for master and {len(s_imgs)} for slave")
+
+
     id = extract_id(m_img_datas[0][0])
     print("Loading camera configuration")
 
@@ -118,7 +121,6 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
 
     print(f"Found {len(m_saveIms)} seeds for master")
 
-
     print("Processing Slave images...")
     s_savePos = []
     s_saveIms = []
@@ -136,6 +138,10 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
             s_saveIms.append(out)
 
     print(f"Found {len(s_saveIms)} seeds for slave")
+    
+    if(len(m_saveIms) == 0 or len(s_saveIms) == 0):
+        print("There must be at least one seed detected on both camera")
+        exit(1)
 
 
     ## Cleaning dataset

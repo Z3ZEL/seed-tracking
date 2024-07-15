@@ -29,7 +29,6 @@ picam2 = Picamera2()
 config = picam2.create_video_configuration({"size": res},lores={"size": res},controls={"FrameRate": framerate},buffer_count=6)
 picam2.align_configuration(config)
 picam2.configure(config)
-picam2.start()
 
 picam2.set_controls(camera_conf["controls"] | {"AfMode" : controls.AfModeEnum.Continuous})
 
@@ -93,7 +92,10 @@ def _camera_capture_buffered_request():
 
 
 def camera_capture():
-    return _camera_capture_buffered_request()
+    picam2.start()
+    img =  _camera_capture_buffered_request()
+    picam2.stop()
+    return img
     
 
 def camera_test():

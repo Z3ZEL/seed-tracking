@@ -2,7 +2,7 @@ import cv2 as cv
 import os
 import glob
 import time
-from resource_manager import CONFIG
+from resource_manager import CONFIG, is_master
 import subprocess
 import signal
 import json
@@ -39,28 +39,36 @@ def trunc_json(json):
         # Si '}' n'est pas trouvé, retourner la chaîne originale sans modification
         return json_formated
 
+folder = CONFIG["master_camera"]["temp_directory"] if is_master() else CONFIG["slave_camera"]["temp_directory"]
+
+video_path = os.path.join(folder,"output.h264")
+metadata_path = os.path.join(folder,"metadata.json")
+
+shot_cmd = f"libcamera-vid --split --inline --level 4.2 --framerate {framerate} --width {res[0]} --height {res[1]} --metadata {metadata_path} -s -i pause -o {video_path} --shutter {camera_conf['controls']['ExposureTime']} -t 0  -n" #--denoise cdn_off -t {duration * 10**3}
+photographer = subprocess.Popen(shot_cmd.split(" "))
+
+temps = glob.glob(os.path.join(folder,"temp*.jpg"))
+for temp in temps:
+    os.remove(temp)
+
 def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix=""):
-    
+    outputfolder = folder
     duration = (end_timestamp-start_timestamp) * 10**-9
     print("Recording for", duration, " seconds")
     # points_path = os.path.join(outputfolder,"output.pts")
-    video_path = os.path.join(outputfolder,"output.h264")
-    metadata_path = os.path.join(outputfolder,"metadata.json")
-    shot_cmd = f"libcamera-vid --split --inline --level 4.2 --framerate {framerate} --width {res[0]} --height {res[1]} --metadata {metadata_path} -s -i pause -o {video_path} --shutter {camera_conf['controls']['ExposureTime']} -t 0  -n" #--denoise cdn_off -t {duration * 10**3}
     convert_cmd = f"ffmpeg -i {video_path} {os.path.join(outputfolder, 'temp_%d.jpg')}"
-
-
-    photographer = subprocess.Popen(shot_cmd.split(" "))    
-
+    
     ## Waiting the good time
-    time.sleep((start_timestamp - time.time_ns()) * 10**-9)
+    while time.time_ns() < start_timestamp:
+        time.sleep(0.001)
     
     print("Starting shot")
 
     os.kill(photographer.pid, signal.SIGUSR1)
 
     ## Waiting
-    time.sleep(duration)
+    while time.time_ns() < end_timestamp:
+        time.sleep(0.001)
     ## Sending signal to the process
 
     ## Stop and kill the process
@@ -69,7 +77,6 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix=""):
     ## Wait a bit
     time.sleep(2)
 
-    os.kill(photographer.pid, signal.SIGTERM)
 
 
     ##Convert to img
@@ -108,7 +115,7 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix=""):
             ts=SYSTEM_BOOTED + img_metadata['SensorTimestamp']
             new_path =  os.path.join(outputfolder, f"{prefix}_img_{ts}_{suffix}.jpg")
             os.rename(img_path,new_path)
-            paths.append(paths)
+            paths.append(new_path)
     ##Cleaning
     os.remove(video_path)
     os.remove(metadata_path)
@@ -128,7 +135,7 @@ def send_shot(sock, start_timestamp, end_timestamp, config, suffix=""):
 
 def fetch_shot(config, number):
     proc = os.system(f'scp {config["slave_camera"]["camera_host"]}@{config["slave_camera"]["camera_address"]}:{config["slave_camera"]["temp_directory"]}/* {config["master_camera"]["temp_directory"]}')
-    file = os.path.join(config["master_camera"]["temp_directory"],f"s_*_{number}.jpg")
+    file = os.path.join(config["master_camera"]["temp_directory"],f"s_img_*_{number}.jpg")
     paths = glob.glob(file)
     if len(paths) < 1:
         print("Error can't find image")
@@ -137,5 +144,11 @@ def fetch_shot(config, number):
 
 
 
+def release():
+    print("Releasing camera")
+    os.kill(photographer.pid, signal.SIGTERM)
 
 
+import atexit
+
+atexit.register(release)

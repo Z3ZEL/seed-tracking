@@ -1,4 +1,3 @@
-
 import cv2
 import args
 import resource_manager 
@@ -25,18 +24,32 @@ def get_highest_number(directory):
 
 def plot_seed_positions(m_computed, s_computed):
     import matplotlib.dates as mdates
+    import numpy as np
     from datetime import datetime
 
     # Example m_computed data structure: [(timestamp1, y1), (timestamp2, y2), ...]
     # Convert timestamps to datetime objects if they're not already
-    m_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in m_computed]
-    s_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in s_computed]
+    m_timestamps = np.array(m_computed)[:, 3]
+    
+    # Normaliser les timestamps
+    min_t = np.min(m_timestamps)
+    max_t = np.max(m_timestamps)
+    m_timestamps = (m_timestamps - min_t) / (max_t - min_t) 
+
+    s_timestamps =  np.array(s_computed)[:, 3]
+    
+    # Normaliser les timestamps
+    min_t = np.min(s_timestamps)
+    max_t = np.max(s_timestamps)
+    s_timestamps = (s_timestamps - min_t) / (max_t - min_t) 
+
+    m_computed_plot = [y for x,y,z,ts in m_computed]
+    s_computed_plot = [y for x,y,z,ts in s_computed]
 
     # Extracting timestamps and y positions
-    m_timestamps = [item[0] for item in m_computed_plot]
-    m_y_positions = [item[1] for item in m_computed_plot]
-    s_timestamps = [item[0] for item in s_computed_plot]
-    s_y_positions = [item[1] for item in s_computed_plot]
+    m_y_positions = [item for item in m_computed_plot]
+    
+    s_y_positions = [item for item in s_computed_plot]
 
     # Plotting
     plt.figure(figsize=(10, 6))
@@ -88,7 +101,7 @@ def main():
         current += 1
         while True:
             input("Press enter to shot")
-            target_timestamp = int(time.time_ns() + (1 * 10**9)) # 1 second shift
+            target_timestamp = int(time.time_ns() + (3 * 10**9)) # 1 second shift
 
 
             # Send cmd to slave
@@ -232,14 +245,15 @@ def main():
 
 
 
-
+        
         if(kwargs['dry_run']):
             print("Deleting images")
             for path in m_paths + s_paths:
                 os.remove(path)
+
+        if kwargs["plot"]:
+            plt.show()
         exit(0)
 
-if __name__ == '__main__':
-    main()
 
     

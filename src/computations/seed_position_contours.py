@@ -5,6 +5,7 @@ class Computer(ImageComputer):
     def __init__(self, **kwargs) -> None:
         self.last_contour = None
         self.history = {}
+        self.area_threshold = kwargs["area_threshold"] if "area_threshold" in kwargs else 100
         super().__init__(**kwargs)
     '''Computes the seed position of the image. Image needs to be passed into a processor.'''
     def compute(self, image : np.array) -> tuple:
@@ -22,7 +23,7 @@ class Computer(ImageComputer):
         contours, _ = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
 
         # Remove contour
-        contours = [contour for contour in contours if cv2.contourArea(contour) > 100]
+        contours = [contour for contour in contours if cv2.contourArea(contour) > self.area_threshold]
         if len(contours) == 0:
             return None
         current_contour = max(contours, key=cv2.contourArea)
