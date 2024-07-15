@@ -38,7 +38,8 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
         s_paths (list): List of slave images path.
 
     Returns:
-        list: List of computed real world position for the master camera.
+        m_computed (list): List of computed master positions.
+        s_computed (list): List of computed slave positions.
     '''
     ## Arg
     verbose = kwargs["verbose"]
@@ -52,7 +53,8 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
 
     ##Import the seed position computer
     seedposition_algorithm = import_module("computations."+config['seed_computing']['seed_position_algorithm'])
-    seedPosition = seedposition_algorithm.Computer(**kwargs)
+    
+    seedPosition : ImageComputer = seedposition_algorithm.Computer(**kwargs)
 
     # Import image
     m_imgs, s_imgs = [cv2.imread(im_path) for im_path in m_paths], [cv2.imread(im_path) for im_path in s_paths]
