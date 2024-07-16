@@ -60,6 +60,8 @@ def test_case(zip_path):
     print(f"Detected {len(s_computed)} seeds out of {info['s']}")
     print(f"Expected velocity: {info['v']}, Computed velocity: {velocity[0]}")
 
+
+    ##TODO: take consideration more seed than expected
     global_seed_recognition_accuracy += (len(m_computed) + len(s_computed))/(info['m'] + info['s'])
 
 

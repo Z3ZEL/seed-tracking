@@ -7,6 +7,7 @@ import subprocess
 import signal
 import json
 from datetime import datetime, timedelta
+from rpi_interaction import turn_light, buzz
 
 
 ## PROCESSOR ###
@@ -57,25 +58,29 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix=""):
     print("Recording for", duration, " seconds")
     # points_path = os.path.join(outputfolder,"output.pts")
     convert_cmd = f"ffmpeg -i {video_path} {os.path.join(outputfolder, 'temp_%d.jpg')}"
-    
+    turn_light(True)
+
+
     ## Waiting the good time
     while time.time_ns() < start_timestamp:
-        time.sleep(0.001)
+        time.sleep(0.0001)
     
     print("Starting shot")
+    buzz(0.5)
 
     os.kill(photographer.pid, signal.SIGUSR1)
 
     ## Waiting
-    while time.time_ns() < end_timestamp:
-        time.sleep(0.001)
+    timeToWait = (end_timestamp - time.time_ns()) * 10**-9
+    print(f"Waiting {timeToWait} s")
+    time.sleep(timeToWait)
     ## Sending signal to the process
 
     ## Stop and kill the process
     os.kill(photographer.pid, signal.SIGUSR1)
-    
+    buzz(0.5)
+    turn_light(False)
     ## Wait a bit
-    time.sleep(2)
 
 
 
@@ -117,10 +122,10 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix=""):
             os.rename(img_path,new_path)
             paths.append(new_path)
     ##Cleaning
-    os.remove(video_path)
-    os.remove(metadata_path)
+    # os.remove(video_path)
+    # os.remove(metadata_path)
     
-    time.sleep(0.5)
+    time.sleep(3)
 
     return paths
 
