@@ -4,7 +4,8 @@ import glob,os
 import shutil
 from resource_manager import CONFIG
 
-from actions.multiple_shot_libcamera import shot as multiple_shot
+from actions.multiple_shot import shot as multiple_shot
+from actions.single_shot import shot as single_shot
 
 def main():
     # from actions.single_shot import shot
@@ -34,7 +35,6 @@ def main():
             mode = cmd[0]
             print("Received a job : ", mode)
             if mode == "single":
-                from actions.single_shot import shot as shot
                 timestamp = int(cmd[1])
                 number = cmd[2]            
 
@@ -42,7 +42,7 @@ def main():
                     shutil.rmtree(outputdir)
                     os.makedirs(outputdir)
                 
-                shot(outputdir, int(timestamp),prefix="s",suffix=number)
+                single_shot(outputdir, int(timestamp),prefix="s",suffix=number)
 
                 time.sleep(0.5)
             elif mode == "multiple":

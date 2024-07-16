@@ -134,7 +134,7 @@ def main():
         exit(0)
     if(kwargs["shot"] == "multiple"):
         import time, os, socket
-        from actions.multiple_shot_libcamera import shot, fetch_shot, send_shot
+        from actions.multiple_shot import shot, fetch_shot, send_shot
         
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         
@@ -209,7 +209,7 @@ def main():
             
     if kwargs['run']:
         import time, os, socket
-        from actions.multiple_shot_libcamera import shot, fetch_shot, send_shot
+        from actions.multiple_shot import shot, fetch_shot, send_shot
         
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         
