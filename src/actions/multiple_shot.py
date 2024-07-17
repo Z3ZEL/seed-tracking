@@ -4,9 +4,9 @@ import glob
 import time
 import subprocess
 import signal
+from rpi_interaction import turn_light
 import json
-from rpi_interaction import turn_light, buzz
-from camera import PHOTOGRAPHER as photographer, PROCESSOR, SYSTEM_BOOTED, METADATA_PATH as metadata_path, VIDEO_PATH as video_path, FOLDER as folder
+from camera import PROCESSOR, VIDEO_PATH as video_path, FOLDER as folder, launch, PTS
 
 def trunc_json(json):
     last = json.rfind('}')
@@ -21,7 +21,6 @@ def trunc_json(json):
 
 
 
-
 def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix=""):
     outputfolder = folder
     duration = (end_timestamp-start_timestamp) * 10**-9
@@ -33,71 +32,75 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix=""):
     for temp in temps:
         os.remove(temp)
 
-
     turn_light(True)
+
     ## Waiting the good time
     while time.time_ns() < start_timestamp:
         time.sleep(0.0001)
     
     print("Starting shot")
-    buzz(0.5)
 
-    os.kill(photographer.pid, signal.SIGUSR1)
+    ## Send start signal
+    # os.kill(photographer.pid, signal.SIGUSR1)
+    
 
-    ## Waiting
-    timeToWait = (end_timestamp - time.time_ns()) * 10**-9
-    print(f"Waiting {timeToWait} s")
-    time.sleep(timeToWait)
-    ## Sending signal to the process
+    # ## Waiting
+    # while time.time_ns() < end_timestamp:
+    #     time.sleep(0.0001)
+    
 
-    ## Stop and kill the process
-    os.kill(photographer.pid, signal.SIGUSR1)
-    buzz(0.5)
-    turn_light(False)
+    ## Stop the process
+    # os.kill(photographer.pid, signal.SIGUSR1)
+
+
+    real_end_time = launch(duration * 1e9)
+    real_start_time = real_end_time - (duration * 1e9)
+
+
+    print(real_end_time - end_timestamp)
+
+    
+    
     ## Wait a bit
-
+    time.sleep(1)
 
 
     ##Convert to img
     converter = subprocess.Popen(convert_cmd.split(" "))
     converter.wait()
     ##Read metadata and processing
+    imgs = []
+    print("Processing images ...")
+    img_paths = sorted(glob.glob(os.path.join(outputfolder, "temp*.jpg"))) 
+    for img_path in img_paths:
+        img = cv.imread(img_path)
+        img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        # img = cv.fastNlMeansDenoising(img, 5, 3)
+        img = PROCESSOR.process(img)
+        imgs.append(img)
+        print(f"{round((len(imgs)/len(img_paths)) * 100)}% completed")
+
     paths = []
-    with open(metadata_path,"r") as file:
-        img_metadatas = json.loads(trunc_json(file.read()))
-        img_paths = sorted(glob.glob(os.path.join(outputfolder, "temp*.jpg")))
-        if(len(img_paths) != len(img_metadatas)):
-            print(len(img_paths), len(img_metadatas))
-            if abs(len(img_paths) - len(img_metadatas) > 1):
-                print("Found more or less image than loaded metadata, have you cleaned your output folder ?")
-                exit(1)
-            else:
-                if(len(img_paths) > len(img_metadatas)):
-                    #More img than properties deleting img
-                    img_paths.pop(-1)
-                else:
-                    #More metadata than img pop metadatas
-                    img_metadatas.pop(-1)
-        imgs = []
-        print("Processing images ...")
-        for img_path, img_metadata in zip(img_paths, img_metadatas):
-            img = cv.imread(img_path)
-            img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-            # img = cv.fastNlMeansDenoising(img, 5, 3)
-            img = PROCESSOR.process(img)
-            imgs.append(img)
-            print(f"{len(imgs)/len(img_paths)} completed\r")
+    with open(PTS, 'r') as file:
+        timestamps = file.read()
+        timestamps = timestamps.split("\n")
+        timestamps.pop(0)
+        timestamps.pop(-1)
+        
+
+        if len(timestamps) != len(img_paths):
+            print("Differents timestamp code founded than picture numbers")
+            exit(1)
+
+
 
         print("Saving images ...")
-        for img, img_path, img_metadata in zip(imgs, img_paths, img_metadatas):
+        for img, img_path, mili_shift in zip(imgs, img_paths,timestamps):
             cv.imwrite(img_path, img)
-            ts=SYSTEM_BOOTED + img_metadata['SensorTimestamp']
-            new_path =  os.path.join(outputfolder, f"{prefix}_img_{ts}_{suffix}.jpg")
+            ts= real_start_time + (float(mili_shift) * 1e6)
+            new_path =  os.path.join(outputfolder, f"{prefix}_img_{int(ts)}_{suffix}.jpg")
             os.rename(img_path,new_path)
             paths.append(new_path)
-    ##Cleaning
-    # os.remove(video_path)
-    # os.remove(metadata_path)
     
     time.sleep(3)
 

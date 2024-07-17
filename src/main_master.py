@@ -27,30 +27,16 @@ def plot_seed_positions(m_computed, s_computed):
     import numpy as np
     from datetime import datetime
 
-    # Example m_computed data structure: [(timestamp1, y1), (timestamp2, y2), ...]
-    # Convert timestamps to datetime objects if they're not already
-    m_timestamps = np.array(m_computed)[:, 3]
+    m_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in m_computed]
+    s_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in s_computed]
     
-    # Normaliser les timestamps
-    min_t = np.min(m_timestamps)
-    max_t = np.max(m_timestamps)
-    m_timestamps = (m_timestamps - min_t) / (max_t - min_t) 
-
-    s_timestamps =  np.array(s_computed)[:, 3]
-    
-    # Normaliser les timestamps
-    min_t = np.min(s_timestamps)
-    max_t = np.max(s_timestamps)
-    s_timestamps = (s_timestamps - min_t) / (max_t - min_t) 
-
-    m_computed_plot = [y for x,y,z,ts in m_computed]
-    s_computed_plot = [y for x,y,z,ts in s_computed]
-
     # Extracting timestamps and y positions
-    m_y_positions = [item for item in m_computed_plot]
-    
-    s_y_positions = [item for item in s_computed_plot]
+    m_timestamps = [item[0] for item in m_computed_plot]
+    m_y_positions = [item[1] for item in m_computed_plot]
+    s_timestamps = [item[0] for item in s_computed_plot]
+    s_y_positions = [item[1] for item in s_computed_plot]
 
+  
     # Plotting
     plt.figure(figsize=(10, 6))
     plt.plot(m_timestamps, m_y_positions, 'o-', label='Computed Y Position')
@@ -101,7 +87,7 @@ def main():
         current += 1
         while True:
             input("Press enter to shot")
-            target_timestamp = int(time.time_ns() + (3 * 10**9)) # 1 second shift
+            target_timestamp = int(time.time_ns() + (2 * 10**9)) # 1 second shift
 
 
             # Send cmd to slave
@@ -141,7 +127,7 @@ def main():
         number = int(time.time())
         
         input("Input press enter to start multiple shot")
-        start_timestamp = time.time_ns() + 3*10**9
+        start_timestamp = time.time_ns() + 2*10**9
         end_timestamp = start_timestamp + 2*10**9 # last 2 seconds
 
         send_shot(sock, start_timestamp, end_timestamp, config, suffix=number)

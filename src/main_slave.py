@@ -5,7 +5,7 @@ import shutil
 from resource_manager import CONFIG
 
 from actions.multiple_shot import shot as multiple_shot
-from actions.single_shot import shot as single_shot
+# from actions.single_shot import shot as single_shot
 
 def main():
     # from actions.single_shot import shot
@@ -38,11 +38,9 @@ def main():
                 timestamp = int(cmd[1])
                 number = cmd[2]            
 
-                if os.path.exists(outputdir):
-                    shutil.rmtree(outputdir)
-                    os.makedirs(outputdir)
+                [os.remove(temp) for temp in glob.glob(os.path.join(outputdir,"*.jpg"))]
                 
-                single_shot(outputdir, int(timestamp),prefix="s",suffix=number)
+                # single_shot(outputdir, int(timestamp),prefix="s",suffix=number)
 
                 time.sleep(0.5)
             elif mode == "multiple":
@@ -52,9 +50,8 @@ def main():
                 number = cmd[3]
 
 
-                temps = glob.glob(os.path.join(outputdir,"*.jpg"))
-                for temp in temps:
-                    os.remove(temp)
+                [os.remove(temp) for temp in glob.glob(os.path.join(outputdir,"*.jpg"))]
+                
                 multiple_shot(outputdir, start_timestamp, end_timestamp, prefix="s", suffix=number)
 
                 time.sleep(0.5)

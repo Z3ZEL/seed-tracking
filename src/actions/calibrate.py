@@ -198,19 +198,24 @@ def calibrate(master_camera_files:str, slave_camera_files:str, config:dict, dry_
 
         with open("config.json", "r") as file:
             config = json.load(file)
+
             config["calibration_data"] = config["calibration_data"] | {
                 "m_cam": {
                     "mtx": mtx1.tolist(),
                     "dist": dist1.tolist(),
+                    "rmse" : ret1
                 },
                 "s_cam": {
                     "mtx": mtx2.tolist(),
-                    "dist": dist2.tolist()
+                    "dist": dist2.tolist(),,
+                    "rmse": ret2
                 },
+                
             }
             if stereo:
                 config["calibration_data"]["R"] = R
                 config["calibration_data"]["T"] = T
+                config["stereo_rmse"] = ret
             
             with open("config.json", "w") as file:
                 file.write(json.dumps(config))
