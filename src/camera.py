@@ -5,7 +5,6 @@ import time
 from resource_manager import CONFIG, is_master
 import signal
 from threading import Thread
-import pty
 from rpi_interaction import turn_light, buzz
 ## PROCESSOR ###
 from interfaces.image_processing import Processor
@@ -29,33 +28,27 @@ framerate=camera_conf['framerate']
 
 FOLDER = CONFIG["master_camera"]["temp_directory"] if is_master() else CONFIG["slave_camera"]["temp_directory"]
 VIDEO_PATH = os.path.join(FOLDER,"output.h264")
-PTS = os.path.join(FOLDER,"pts.txt")
+# PTS = os.path.join(FOLDER,"pts.txt")
 # METADATA_PATH = os.path.join(FOLDER,"metadata.json")
-make_shot_cmd = lambda duration :  f"rpicam-vid --save-pts {PTS} --level 4.2 --framerate {framerate} --width {res[0]} --height {res[1]} -o {VIDEO_PATH} --shutter {camera_conf['controls']['ExposureTime']} -t {duration}  -n" #--denoise cdn_off -t {duration * 10**3}
+make_shot_cmd = lambda duration :  f"rpicam-vid --metadata - --level 4.2 --framerate {framerate} --width {res[0]} --height {res[1]} -o {VIDEO_PATH} --shutter {camera_conf['controls']['ExposureTime']} -t {duration}  -n" #--denoise cdn_off -t {duration * 10**3}
 # PHOTOGRAPHER = subprocess.Popen(shot_cmd.split(" "))
 
-def _listen_for_buzz(fd):
-    try:
-        with os.fdopen(fd, 'r') as pipe:
-            for line in iter(pipe.readline, b''):
-                if "Selected sensor format" in line:
-                    buzz(0.5)
-    except Exception:
-        pass
-                
+
 
 def launch(duration : int):
     duration_mili = round(duration * 1e-6, 0)
-    print(duration_mili)
-    master_fd, slave_fd = pty.openpty()
-    photo = subprocess.Popen(make_shot_cmd(duration_mili).split(" "),stdout=slave_fd, stderr=slave_fd, text=True,bufsize=0)
-    Thread(target=_listen_for_buzz, args=(master_fd,)).start()
-    os.close(slave_fd)
-    photo.wait()
-    end_time = time.time_ns()
+    
+    photo = subprocess.Popen(make_shot_cmd(duration_mili).split(" "),stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    
+
+
+
+    
+    
+    
     buzz(0.5)
     turn_light(False)
-    return end_time
+    return timestamps
 
 def release():
     print("Releasing camera")
