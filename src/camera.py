@@ -36,25 +36,39 @@ make_shot_cmd = lambda duration :  f"rpicam-vid --metadata - --level 4.2 --frame
 
 
 def launch(duration : int):
+    '''
+    launch a recording lasting duration in nanoseconds return an array of timestamps corresponding of frame timestamp
+    '''
     duration_mili = round(duration * 1e-6, 0)
     
     photo = subprocess.Popen(make_shot_cmd(duration_mili).split(" "),stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    
 
+    buffer = []
 
-
-    
-    
+    hasStarted = False
+    with photo.stdout as pipe:
+        while photo.poll() == None:
+            line = pipe.readline()
+            if line == "":
+                continue
+            if not hasStarted:
+                buzz(0.5)
+                print("Started recording :", time.time_ns())
+                
+                hasStarted = True
+            if "SensorTimestamp" in line:
+                buffer.append(int(line.split(":")[-1].replace(",","").replace(" ", "").replace("\n","")) + SYSTEM_BOOTED)
+    print("Finished")
     
     buzz(0.5)
     turn_light(False)
-    return timestamps
+    return buffer
 
 def release():
     print("Releasing camera")
     # os.kill(PHOTOGRAPHER.pid, signal.SIGTERM)
     os.remove(VIDEO_PATH) if os.path.exists(VIDEO_PATH) else None
-    os.remove(PTS) if os.path.exists(PTS) else None
+    # os.remove(PTS) if os.path.exists(PTS) else None
 
 
 import atexit

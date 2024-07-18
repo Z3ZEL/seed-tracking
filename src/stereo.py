@@ -18,23 +18,6 @@ import glob
 import cv2 as cv
 import numpy as np
 
-m_paths = sorted(glob.glob("output/m_img_*_3.jpg"))
-s_paths = sorted(glob.glob("output/s_img_*_3.jpg"))
+m_paths = sorted(glob.glob("output/m_img_*_1721272738.jpg"))
+s_paths = sorted(glob.glob("output/s_img_*_1721272738.jpg"))
 
-m_data = []
-s_data = []
-
-for i in range(len(m_paths)):
-    m_data.append((i,extract_timestamp(m_paths[i].split("/")[-1])))
-for i in range(len(s_paths)):
-    s_data.append((i,extract_timestamp(s_paths[i].split("/")[-1])))
-
-import matplotlib.pyplot as plt
-
-m_data = np.array(m_data)
-s_data = np.array(s_data)
-
-plt.plot(m_data[:,0], m_data[:,1])
-plt.plot(s_data[:,0], s_data[:,1])
-
-plt.show()

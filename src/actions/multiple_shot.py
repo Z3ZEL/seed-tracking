@@ -3,10 +3,13 @@ import os
 import glob
 import time
 import subprocess
+import re
 import signal
+import numpy as np
 from rpi_interaction import turn_light
+from resource_manager import is_master,extract_timestamp, CONFIG
 import json
-from camera import PROCESSOR, VIDEO_PATH as video_path, FOLDER as folder, launch, PTS
+from camera import PROCESSOR, VIDEO_PATH as video_path, FOLDER as folder, launch
 
 def trunc_json(json):
     last = json.rfind('}')
@@ -20,8 +23,17 @@ def trunc_json(json):
         return json_formated
 
 
+def fetch_shot(config, number):
+    proc = os.system(f'scp {config["slave_camera"]["camera_host"]}@{config["slave_camera"]["camera_address"]}:{config["slave_camera"]["temp_directory"]}/* {config["master_camera"]["temp_directory"]}')
+    file = os.path.join(config["master_camera"]["temp_directory"],f"s_img_*_{number}.jpg")
+    paths = glob.glob(file)
+    if len(paths) < 1:
+        print("Error can't find image")
+        exit(1)
+    return paths
 
-def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix=""):
+
+def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
     outputfolder = folder
     duration = (end_timestamp-start_timestamp) * 10**-9
     print("Recording for", duration, " seconds")
@@ -38,31 +50,11 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix=""):
     while time.time_ns() < start_timestamp:
         time.sleep(0.0001)
     
-    print("Starting shot")
-
-    ## Send start signal
-    # os.kill(photographer.pid, signal.SIGUSR1)
-    
-
-    # ## Waiting
-    # while time.time_ns() < end_timestamp:
-    #     time.sleep(0.0001)
-    
-
-    ## Stop the process
-    # os.kill(photographer.pid, signal.SIGUSR1)
-
-
-    real_end_time = launch(duration * 1e9)
-    real_start_time = real_end_time - (duration * 1e9)
-
-
-    print(real_end_time - end_timestamp)
-
-    
+    print("Starting shot ",time.time_ns())
+    timestamps = launch(duration * 1e9)
     
     ## Wait a bit
-    time.sleep(1)
+    # time.sleep(1)
 
 
     ##Convert to img
@@ -81,30 +73,68 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix=""):
         print(f"{round((len(imgs)/len(img_paths)) * 100)}% completed")
 
     paths = []
-    with open(PTS, 'r') as file:
-        timestamps = file.read()
-        timestamps = timestamps.split("\n")
-        timestamps.pop(0)
-        timestamps.pop(-1)
-        
-
-        if len(timestamps) != len(img_paths):
-            print("Differents timestamp code founded than picture numbers")
-            exit(1)
+    if len(timestamps) != len(img_paths):
+        print("Differents timestamp code founded than picture numbers")
+        exit(1)
 
 
 
-        print("Saving images ...")
-        for img, img_path, mili_shift in zip(imgs, img_paths,timestamps):
-            cv.imwrite(img_path, img)
-            ts= real_start_time + (float(mili_shift) * 1e6)
-            new_path =  os.path.join(outputfolder, f"{prefix}_img_{int(ts)}_{suffix}.jpg")
-            os.rename(img_path,new_path)
-            paths.append(new_path)
+    print("Saving images ...")
+    for img, img_path, shift in zip(imgs, img_paths,timestamps):
+        cv.imwrite(img_path, img)
+        ts= shift
+        new_path =  os.path.join(outputfolder, f"{prefix}_img_{int(ts)}_{suffix}.jpg")
+        os.rename(img_path,new_path)
+        paths.append(new_path)
     
     time.sleep(3)
 
-    return paths
+    if not(is_master()):
+        return paths
+
+    s_paths = fetch_shot(CONFIG, suffix)
+    s_timestamps = []
+    for s_path in s_paths:
+        s_timestamps.append(extract_timestamp(s_path.split("/")[-1]))
+
+    try:
+        m_paths = np.array(paths)
+        s_paths = np.array(s_paths)
+    except ValueError as e:
+        print("Erreur : ",e)
+
+    
+
+
+
+    m_timestamps = np.array([int(ts) for ts in timestamps])
+    s_timestamps = np.array([int(ts) for ts in s_timestamps])
+
+    m_data = np.column_stack((m_paths,m_timestamps))
+    s_data = np.column_stack((s_paths,s_timestamps))
+
+
+    print(f"Fetched {len(m_data)} for master and {len(s_data)} for slave")
+
+    
+    min_ts = max(m_timestamps.min(), s_timestamps.min())
+    max_ts = min(m_timestamps.max(), s_timestamps.max())
+    print(f"Range of interest : [{min_ts} : {max_ts}]")
+    m_data_filtered = m_data[(m_timestamps >= min_ts) & (m_timestamps <= max_ts)]
+
+    s_data_filtered = s_data[(s_timestamps >= min_ts) & (s_timestamps <= max_ts)]
+    
+    m_remove = m_data[(m_timestamps < min_ts) | (m_timestamps > max_ts)]
+    s_remove = s_data[(s_timestamps < min_ts) | (s_timestamps > max_ts)]
+
+    print(f"Interesting range is {len(m_data_filtered)} for master and {len(s_data_filtered)} for slave")
+
+    print("Cleaning...")
+
+    [os.remove(path) for path in m_remove[:,0]]
+    [os.remove(path) for path in s_remove[:,0]]
+
+    return m_data_filtered[:,0], s_data_filtered[:,0], (min_ts,max_ts)
 
     
 
@@ -115,13 +145,5 @@ def send_shot(sock, start_timestamp, end_timestamp, config, suffix=""):
     sock.sendto(message, (config["slave_camera"]["camera_address"], config["socket_port"]))
 
 
-def fetch_shot(config, number):
-    proc = os.system(f'scp {config["slave_camera"]["camera_host"]}@{config["slave_camera"]["camera_address"]}:{config["slave_camera"]["temp_directory"]}/* {config["master_camera"]["temp_directory"]}')
-    file = os.path.join(config["master_camera"]["temp_directory"],f"s_img_*_{number}.jpg")
-    paths = glob.glob(file)
-    if len(paths) < 1:
-        print("Error can't find image")
-        exit(1)
-    return paths
 
 

@@ -5,7 +5,7 @@ import shutil
 from resource_manager import CONFIG
 
 from actions.multiple_shot import shot as multiple_shot
-# from actions.single_shot import shot as single_shot
+from actions.single_shot import shot as single_shot
 
 def main():
     # from actions.single_shot import shot
@@ -40,7 +40,7 @@ def main():
 
                 [os.remove(temp) for temp in glob.glob(os.path.join(outputdir,"*.jpg"))]
                 
-                # single_shot(outputdir, int(timestamp),prefix="s",suffix=number)
+                single_shot(outputdir, int(timestamp),prefix="s",suffix=number)
 
                 time.sleep(0.5)
             elif mode == "multiple":
@@ -53,9 +53,6 @@ def main():
                 [os.remove(temp) for temp in glob.glob(os.path.join(outputdir,"*.jpg"))]
                 
                 multiple_shot(outputdir, start_timestamp, end_timestamp, prefix="s", suffix=number)
-
-                time.sleep(0.5)
-
 
 
 
