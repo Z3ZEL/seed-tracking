@@ -4,6 +4,7 @@ import time
 import json
 import numpy as np
 import args
+import re
 CONFIG={}
 
 with open("config.json", "r") as file:
@@ -77,3 +78,17 @@ def save_images(dirPath, images, timestamp=False):
 
 def is_master():
     return args.is_master()
+
+def extract_timestamp(filename):
+
+    # Expression régulière pour extraire le timestamp
+    pattern = r"[a-zA-Z]+_img_(\d+)_\d+\.jpg"
+
+    # Utiliser re.search pour trouver la correspondance
+    match = re.search(pattern, filename)
+    # Vérifier si une correspondance a été trouvée et extraire le timestamp
+    if match:
+        timestamp = match.group(1)
+        return int(timestamp)
+    else:
+        return None

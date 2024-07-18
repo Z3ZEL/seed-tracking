@@ -153,9 +153,29 @@ def main():
             s_paths = fetch_shot(config, number)
 
             print(f"Took {len(m_paths)} pics from the master cam and {len(s_paths)} from the slave cam")
+            m_paths = sorted(m_paths)
+            s_paths = sorted(s_paths)
             if(kwargs['plot']):
-                #ploting img
-                pass
+                import numpy as np
+                m_data = []
+                s_data = []
+
+                for i in range(len(m_paths)):
+                    m_data.append((i,resource_manager.extract_timestamp(m_paths[i].split("/")[-1])))
+                for i in range(len(s_paths)):
+                    s_data.append((i,resource_manager.extract_timestamp(s_paths[i].split("/")[-1])))
+                
+                import matplotlib.pyplot as plt
+
+                m_data = np.array(m_data)
+                s_data = np.array(s_data)
+
+                plt.plot(m_data[:,0], m_data[:,1], color="red")
+                plt.axhline(y=start_timestamp, color='green', linestyle='--', label=f'Min')
+                plt.axhline(y=end_timestamp, color='green', linestyle='--', label=f'Max')
+                plt.plot(s_data[:,0], s_data[:,1], color="blue")
+
+                plt.show()
             if(kwargs['dry_run']):
                 print("Deleting images")
                 for path in m_paths + s_paths:

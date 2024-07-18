@@ -41,7 +41,7 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix=""):
     
     start = time.time_ns()
     print(f"Starting shot at {start}")
-    suffix=str(start)
+
     buffer = launch(duration * 1e9)
 
     ##Convert to img
@@ -101,7 +101,7 @@ def send_shot(sock, start_timestamp, end_timestamp, config, suffix=""):
 
 
 def fetch_shot(config, number):
-    proc = os.system(f'scp {config["slave_camera"]["camera_host"]}@{config["slave_camera"]["camera_address"]}:{config["slave_camera"]["temp_directory"]}/* {config["master_camera"]["temp_directory"]}')
+    proc = os.system(f'scp {config["slave_camera"]["camera_host"]}@{config["slave_camera"]["camera_address"]}:{config["slave_camera"]["temp_directory"]}/s_img_* {config["master_camera"]["temp_directory"]}')
     file = os.path.join(config["master_camera"]["temp_directory"],f"s_img_*_{number}.jpg")
     paths = glob.glob(file)
     if len(paths) < 1:
