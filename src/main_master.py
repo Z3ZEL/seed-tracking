@@ -138,28 +138,28 @@ def main():
         
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         
-        number = int(time.time())
-        
-        input("Input press enter to start multiple shot")
-        start_timestamp = time.time_ns() + 3*10**9
-        end_timestamp = start_timestamp + 2*10**9 # last 2 seconds
+        while True:
+            input("Input press enter to start multiple shot")
+            number = int(time.time())
+            start_timestamp = time.time_ns() + 3*10**9
+            end_timestamp = start_timestamp + 2*10**9 # last 2 seconds
 
-        send_shot(sock, start_timestamp, end_timestamp, config, suffix=number)
+            send_shot(sock, start_timestamp, end_timestamp, config, suffix=number)
 
-        m_paths = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
+            m_paths = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
 
-        time.sleep(0.5)
+            time.sleep(0.5)
 
-        s_paths = fetch_shot(config, number)
+            s_paths = fetch_shot(config, number)
 
-        print(f"Took {len(m_paths)} pics from the master cam and {len(s_paths)} from the slave cam")
-        if(kwargs['plot']):
-            #ploting img
-            pass
-        if(kwargs['dry_run']):
-            print("Deleting images")
-            for path in m_paths + s_paths:
-                os.remove(path)
+            print(f"Took {len(m_paths)} pics from the master cam and {len(s_paths)} from the slave cam")
+            if(kwargs['plot']):
+                #ploting img
+                pass
+            if(kwargs['dry_run']):
+                print("Deleting images")
+                for path in m_paths + s_paths:
+                    os.remove(path)
         exit(0)
     if(kwargs["shot"] == 'stress'):
         from camera import camera_test
