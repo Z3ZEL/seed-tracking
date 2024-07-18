@@ -30,35 +30,37 @@ FOLDER = CONFIG["master_camera"]["temp_directory"] if is_master() else CONFIG["s
 VIDEO_PATH = os.path.join(FOLDER,"output.h264")
 # PTS = os.path.join(FOLDER,"pts.txt")
 # METADATA_PATH = os.path.join(FOLDER,"metadata.json")
-make_shot_cmd = lambda duration :  f"rpicam-vid --metadata - --level 4.2 --framerate {framerate} --width {res[0]} --height {res[1]} -o {VIDEO_PATH} --shutter {camera_conf['controls']['ExposureTime']} -t {duration}  -n" #--denoise cdn_off -t {duration * 10**3}
+make_shot_cmd = lambda duration :  f"rpicam-vid -s --metadata - --level 4.2 --framerate {framerate} --width {res[0]} --height {res[1]} -o {VIDEO_PATH} --shutter {camera_conf['controls']['ExposureTime']} -t {duration}  -n" #--denoise cdn_off -t {duration * 10**3}
 # PHOTOGRAPHER = subprocess.Popen(shot_cmd.split(" "))
 
+print(make_shot_cmd(0   ))
 
 
-def launch(duration : int):
+def launch(end_timestamp : int):
     '''
     launch a recording lasting duration in nanoseconds return an array of timestamps corresponding of frame timestamp
     '''
-    duration_mili = round(duration * 1e-6, 0)
+    # duration_mili = round(duration * 1e-6, 0)
     
-    photo = subprocess.Popen(make_shot_cmd(duration_mili).split(" "),stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    photo = subprocess.Popen(make_shot_cmd(0).split(" "),stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
     buffer = []
 
     hasStarted = False
     with photo.stdout as pipe:
-        while photo.poll() == None:
+        while time.time_ns() < end_timestamp:
             line = pipe.readline()
             if line == "":
                 continue
             if not hasStarted:
                 buzz(0.5)
-                print("Started recording :", time.time_ns())
-                
+                print("Started recording :", time.time_ns())          
                 hasStarted = True
             if "SensorTimestamp" in line:
                 buffer.append(int(line.split(":")[-1].replace(",","").replace(" ", "").replace("\n","")) + SYSTEM_BOOTED)
+        os.kill(photo.pid, signal.SIGUSR1)
     print("Finished")
+    os.kill(photo.pid, signal.SIGTERM)
     
     buzz(0.5)
     turn_light(False)

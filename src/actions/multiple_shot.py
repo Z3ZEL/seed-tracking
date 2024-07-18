@@ -24,7 +24,7 @@ def trunc_json(json):
 
 
 def fetch_shot(config, number):
-    proc = os.system(f'scp {config["slave_camera"]["camera_host"]}@{config["slave_camera"]["camera_address"]}:{config["slave_camera"]["temp_directory"]}/* {config["master_camera"]["temp_directory"]}')
+    proc = os.system(f'scp {config["slave_camera"]["camera_host"]}@{config["slave_camera"]["camera_address"]}:{config["slave_camera"]["temp_directory"]}/s_img_* {config["master_camera"]["temp_directory"]}')
     file = os.path.join(config["master_camera"]["temp_directory"],f"s_img_*_{number}.jpg")
     paths = glob.glob(file)
     if len(paths) < 1:
@@ -51,7 +51,7 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
         time.sleep(0.0001)
     
     print("Starting shot ",time.time_ns())
-    timestamps = launch(duration * 1e9)
+    timestamps = launch(end_timestamp)
     
     ## Wait a bit
     # time.sleep(1)
@@ -73,9 +73,16 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
         print(f"{round((len(imgs)/len(img_paths)) * 100)}% completed")
 
     paths = []
-    if len(timestamps) != len(img_paths):
-        print("Differents timestamp code founded than picture numbers")
+    if abs(len(timestamps) - len(img_paths)) >= 2:
+        print("Differents timestamp code founded than picture numbers ",len(timestamps), " ",len(img_paths))
         exit(1)
+
+    while len(timestamps) != len(img_paths):
+        if len(timestamps) > len(img_paths):
+            timestamps.pop(-1)
+        else:
+            img_paths.pop(-1)
+
 
 
 
@@ -127,7 +134,7 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
     m_remove = m_data[(m_timestamps < min_ts) | (m_timestamps > max_ts)]
     s_remove = s_data[(s_timestamps < min_ts) | (s_timestamps > max_ts)]
 
-    print(f"Interesting range is {len(m_data_filtered)} for master and {len(s_data_filtered)} for slave")
+    print(f"Interesting range is {len(m_data_filtered)} for master and {len(s_data_filtered)} for slave ({round((max_ts-min_ts)*1e-9, 2)} s )")
 
     print("Cleaning...")
 

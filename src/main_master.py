@@ -126,8 +126,8 @@ def main():
         number = int(time.time())
         
         input("Input press enter to start multiple shot")
-        start_timestamp = time.time_ns() + 2*10**9
-        end_timestamp = start_timestamp + 2*10**9 # last 2 seconds
+        start_timestamp = time.time_ns() + 1*10**9
+        end_timestamp = start_timestamp + 4*10**9 # last 2 seconds
 
         send_shot(sock, start_timestamp, end_timestamp, config, suffix=number)
 
