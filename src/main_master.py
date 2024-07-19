@@ -4,6 +4,10 @@ import resource_manager
 config = resource_manager.CONFIG
 import matplotlib.pyplot as plt
 
+def release_imgs(m_paths, s_paths):
+    print("Removed imgs")
+    resource_manager.delete_paths(m_paths)
+    resource_manager.delete_paths(s_paths)
 
 def get_highest_number(directory):
     import os,re
@@ -22,35 +26,23 @@ def get_highest_number(directory):
 
     return highest_number
 
+
+
 def plot_seed_positions(m_computed, s_computed):
     import matplotlib.dates as mdates
     import numpy as np
     from datetime import datetime
 
-    # Example m_computed data structure: [(timestamp1, y1), (timestamp2, y2), ...]
-    # Convert timestamps to datetime objects if they're not already
-    m_timestamps = np.array(m_computed)[:, 3]
+    m_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in m_computed]
+    s_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in s_computed]
     
-    # Normaliser les timestamps
-    min_t = np.min(m_timestamps)
-    max_t = np.max(m_timestamps)
-    m_timestamps = (m_timestamps - min_t) / (max_t - min_t) 
-
-    s_timestamps =  np.array(s_computed)[:, 3]
-    
-    # Normaliser les timestamps
-    min_t = np.min(s_timestamps)
-    max_t = np.max(s_timestamps)
-    s_timestamps = (s_timestamps - min_t) / (max_t - min_t) 
-
-    m_computed_plot = [y for x,y,z,ts in m_computed]
-    s_computed_plot = [y for x,y,z,ts in s_computed]
-
     # Extracting timestamps and y positions
-    m_y_positions = [item for item in m_computed_plot]
-    
-    s_y_positions = [item for item in s_computed_plot]
+    m_timestamps = [item[0] for item in m_computed_plot]
+    m_y_positions = [item[1] for item in m_computed_plot]
+    s_timestamps = [item[0] for item in s_computed_plot]
+    s_y_positions = [item[1] for item in s_computed_plot]
 
+  
     # Plotting
     plt.figure(figsize=(10, 6))
     plt.plot(m_timestamps, m_y_positions, 'o-', label='Computed Y Position')
@@ -101,19 +93,14 @@ def main():
         current += 1
         while True:
             input("Press enter to shot")
-            target_timestamp = int(time.time_ns() + (3 * 10**9)) # 1 second shift
+            target_timestamp = int(time.time_ns() + (2 * 10**9)) # 1 second shift
 
 
             # Send cmd to slave
             send_shot(sock, target_timestamp, config, suffix=current)
             
-            m_path = shot("output", target_timestamp,suffix=current)
+            m_path, s_path = shot("output", target_timestamp,suffix=current)
 
-            #Wait a bit
-            time.sleep(0.5)
-
-            #Fetch the slave img
-            s_path = fetch_shot(config, current)    
 
             current += 1
             
@@ -134,52 +121,44 @@ def main():
         exit(0)
     if(kwargs["shot"] == "multiple"):
         import time, os, socket
+        import numpy as np
         from actions.multiple_shot import shot, fetch_shot, send_shot
         
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         
-        while True:
-            input("Input press enter to start multiple shot")
-            number = int(time.time())
-            start_timestamp = time.time_ns() + 3*10**9
-            end_timestamp = start_timestamp + 2*10**9 # last 2 seconds
+        number = int(time.time())
+        
+        input("Input press enter to start multiple shot")
+        start_timestamp = time.time_ns() + 1*10**9
+        end_timestamp = start_timestamp + 4*10**9 # last 2 seconds
 
             send_shot(sock, start_timestamp, end_timestamp, config, suffix=number)
 
-            m_paths = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
+        m_paths, s_paths, roi = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
+        m_paths = sorted(m_paths)
+        s_paths = sorted(s_paths)
+        if(kwargs['plot']):
+            m_data = []
+            s_data = []
 
-            time.sleep(0.5)
+            for i in range(len(m_paths)):
+                m_data.append((i,resource_manager.extract_timestamp(m_paths[i].split("/")[-1])))
+            for i in range(len(s_paths)):
+                s_data.append((i,resource_manager.extract_timestamp(s_paths[i].split("/")[-1])))
+            
+            m_data = np.array(m_data)
+            s_data = np.array(s_data)
 
-            s_paths = fetch_shot(config, number)
+            plt.plot(m_data[:,0], m_data[:,1], color="red")
+            plt.axhline(y=roi[0], color='green', linestyle='--', label=f'Min')
+            plt.axhline(y=roi[1], color='green', linestyle='--', label=f'Max')
+            plt.plot(s_data[:,0], s_data[:,1], color="blue")
 
-            print(f"Took {len(m_paths)} pics from the master cam and {len(s_paths)} from the slave cam")
-            m_paths = sorted(m_paths)
-            s_paths = sorted(s_paths)
-            if(kwargs['plot']):
-                import numpy as np
-                m_data = []
-                s_data = []
-
-                for i in range(len(m_paths)):
-                    m_data.append((i,resource_manager.extract_timestamp(m_paths[i].split("/")[-1])))
-                for i in range(len(s_paths)):
-                    s_data.append((i,resource_manager.extract_timestamp(s_paths[i].split("/")[-1])))
-                
-                import matplotlib.pyplot as plt
-
-                m_data = np.array(m_data)
-                s_data = np.array(s_data)
-
-                plt.plot(m_data[:,0], m_data[:,1], color="red")
-                plt.axhline(y=start_timestamp, color='green', linestyle='--', label=f'Min')
-                plt.axhline(y=end_timestamp, color='green', linestyle='--', label=f'Max')
-                plt.plot(s_data[:,0], s_data[:,1], color="blue")
-
-                plt.show()
-            if(kwargs['dry_run']):
-                print("Deleting images")
-                for path in m_paths + s_paths:
-                    os.remove(path)
+            plt.show()
+        if(kwargs['dry_run']):
+            print("Deleting images")
+            for path in m_paths + s_paths:
+                os.remove(path)
         exit(0)
     if(kwargs["shot"] == 'stress'):
         from camera import camera_test
@@ -230,37 +209,50 @@ def main():
     if kwargs['run']:
         import time, os, socket
         from actions.multiple_shot import shot, fetch_shot, send_shot
-        
+        from actions.calculate import calculate_real_world_position, calculate_velocity
+
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         
         number = int(input("Enter an ID number"))
-        
+        duration = 4
         input("Input press enter to start multiple shot")
-        start_timestamp = time.time_ns() + 3*10**9
-        end_timestamp = start_timestamp + 2*10**9 # last 2 seconds
+        start_timestamp = time.time_ns() + 1*1e9
+        end_timestamp = start_timestamp + (duration * 1e9 )
 
-        send_shot(sock, start_timestamp, end_timestamp, config, suffix=number)
+        send_shot(sock, int(start_timestamp), int(end_timestamp), config, suffix=number)
 
-        m_paths = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
-
-        time.sleep(0.5)
-
-        s_paths = fetch_shot(config, number)
-
-        print(f"Took {len(m_paths)} pics from the master cam and {len(s_paths)} from the slave cam")
+        m_paths, s_paths, roi = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
         
+        #If the real range captured is inferior of 50% of the requested duration, then exit
+        if roi[1] - roi[0] < 0.2 * duration * 1e9: 
+            print("The windows captured is too small aborting...")
+            release_imgs(m_paths, s_paths)
+            exit(1)
+
         m_paths = sorted(m_paths)
         s_paths = sorted(s_paths)
 
-        from actions.calculate import calculate_real_world_position, calculate_velocity
-
-        m_computed, s_computed = calculate_real_world_position(m_paths, s_paths, config, **kwargs)
-
+        try:
+            m_computed, s_computed = calculate_real_world_position(m_paths, s_paths, config, **kwargs)
+        except SystemExit:
+            if kwargs["dry_run"]:
+                release_imgs(m_paths, s_paths)
+            exit(1)
         if kwargs['plot']:
             plot_seed_positions(m_computed, s_computed)
 
-        velocity, error = calculate_velocity(m_computed, s_computed, config, **kwargs)
 
+            if len(m_computed) <=1 or len(s_computed) <= 1:
+                print("Must be at least 2 seeds for boths")
+                if kwargs["dry_run"]:
+                    release_imgs(m_paths, s_paths)
+                exit(1)
+
+        try:
+            velocity, error = calculate_velocity(m_computed, s_computed, config, **kwargs)
+        except SystemExit:
+            if kwargs["dry_run"]:
+                release_imgs(m_paths, s_paths)
         print(f"Estimated velocity : {round(velocity,3)} m/s +- {round(error,3)} m/s")
 
 

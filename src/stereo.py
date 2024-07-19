@@ -1,5 +1,3 @@
-import matplotlib.pyplot as plt
-import glob
 import re
 def extract_timestamp(filename):
 
@@ -16,41 +14,10 @@ def extract_timestamp(filename):
         return None
 
 
-start_1 = 1721266904571440725
-start_2 =1721266921437772947
-start_3=1721266945800131713
-path_1 = sorted(glob.glob(f"output/m_img_*_{start_1}.jpg"))
-path_2 = sorted(glob.glob(f"output/m_img_*_{start_2}.jpg"))
-path_3 = sorted(glob.glob(f"output/m_img_*_{start_3}.jpg"))
+import glob
+import cv2 as cv
+import numpy as np
 
+m_paths = sorted(glob.glob("output/m_img_*_1721272738.jpg"))
+s_paths = sorted(glob.glob("output/s_img_*_1721272738.jpg"))
 
-
-# Extraire les timestamps
-timestamps_1 = [extract_timestamp(path.split("/")[-1]) for path in path_1]
-timestamps_2 = [extract_timestamp(path.split("/")[-1]) for path in path_2]
-timestamps_3 = [extract_timestamp(path.split("/")[-1]) for path in path_3]
-
-# Créer les listes de numéros d'image
-image_numbers_1 = list(range(len(timestamps_1)))
-image_numbers_2 = list(range(len(timestamps_2)))
-image_numbers_3 = list(range(len(timestamps_3)))
-
-# Tracer les timestamps
-plt.figure(figsize=(10, 6))
-plt.plot(image_numbers_1, timestamps_1, 'o-', label='Path 1')
-plt.plot(image_numbers_2, timestamps_2, 'x-', label='Path 2')
-plt.plot(image_numbers_3, timestamps_3, 's-', label='Path 3')
-# Ajouter des lignes horizontales pour les valeurs maximales
-# plt.axhline(y=1721266145000000000, color='blue', linestyle='--', label=f'Camera started at')
-plt.axhline(y=start_1, color='orange', linestyle='--', label=f'First')
-plt.axhline(y=start_2, color='orange', linestyle='--', label=f'Second')
-plt.axhline(y=start_3, color='orange', linestyle='--', label=f'Third')
-
-# Formater le plot
-plt.xlabel('Image Number')
-plt.ylabel('Timestamp')
-plt.title('Timestamps of Images in Different Paths')
-plt.legend()
-
-# Afficher le plot
-plt.show()

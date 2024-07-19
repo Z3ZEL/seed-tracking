@@ -38,9 +38,7 @@ def main():
                 timestamp = int(cmd[1])
                 number = cmd[2]            
 
-                if os.path.exists(outputdir):
-                    shutil.rmtree(outputdir)
-                    os.makedirs(outputdir)
+                [os.remove(temp) for temp in glob.glob(os.path.join(outputdir,"*.jpg"))]
                 
                 single_shot(outputdir, int(timestamp),prefix="s",suffix=number)
 
@@ -52,13 +50,9 @@ def main():
                 number = cmd[3]
 
 
-                temps = glob.glob(os.path.join(outputdir,"*.jpg"))
-                for temp in temps:
-                    os.remove(temp)
+                [os.remove(temp) for temp in glob.glob(os.path.join(outputdir,"*.jpg"))]
+                
                 multiple_shot(outputdir, start_timestamp, end_timestamp, prefix="s", suffix=number)
-
-                time.sleep(0.5)
-
 
 
 

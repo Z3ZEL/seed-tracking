@@ -21,6 +21,19 @@ def extract_digit(x):
 
 def extract_matrix_and_dist(cam_data):
     return np.array(cam_data["mtx"]), np.array(cam_data["dist"])
+def extract_timestamp(filename):
+
+    # Expression régulière pour extraire le timestamp
+    pattern = r"[a-zA-Z]+_img_(\d+)_\d+\.jpg"
+
+    # Utiliser re.search pour trouver la correspondance
+    match = re.search(pattern, filename)
+    # Vérifier si une correspondance a été trouvée et extraire le timestamp
+    if match:
+        timestamp = match.group(1)
+        return int(timestamp)
+    else:
+        return None
 
 def load_camera_configuration() -> list[np.array, np.array, np.array, np.array, np.array, np.array]:
     '''
@@ -79,16 +92,7 @@ def save_images(dirPath, images, timestamp=False):
 def is_master():
     return args.is_master()
 
-def extract_timestamp(filename):
-
-    # Expression régulière pour extraire le timestamp
-    pattern = r"[a-zA-Z]+_img_(\d+)_\d+\.jpg"
-
-    # Utiliser re.search pour trouver la correspondance
-    match = re.search(pattern, filename)
-    # Vérifier si une correspondance a été trouvée et extraire le timestamp
-    if match:
-        timestamp = match.group(1)
-        return int(timestamp)
-    else:
-        return None
+def delete_paths(paths):
+    for path in paths:
+        if os.path.exists(path):
+            os.remove(path)

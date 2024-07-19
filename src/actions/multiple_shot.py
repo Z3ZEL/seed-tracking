@@ -3,10 +3,13 @@ import os
 import glob
 import time
 import subprocess
+import re
 import signal
+import numpy as np
+from rpi_interaction import turn_light
+from resource_manager import is_master,extract_timestamp, CONFIG
 import json
-from rpi_interaction import turn_light, buzz
-from camera import PHOTOGRAPHER as photographer, launch, PROCESSOR, SYSTEM_BOOTED, VIDEO_PATH as video_path, FOLDER as folder
+from camera import PROCESSOR, VIDEO_PATH as video_path, FOLDER as folder, launch
 
 def trunc_json(json):
     last = json.rfind('}')
@@ -20,9 +23,17 @@ def trunc_json(json):
         return json_formated
 
 
+def fetch_shot(config, number):
+    proc = os.system(f'scp {config["slave_camera"]["camera_host"]}@{config["slave_camera"]["camera_address"]}:{config["slave_camera"]["temp_directory"]}/s_img_* {config["master_camera"]["temp_directory"]}')
+    file = os.path.join(config["master_camera"]["temp_directory"],f"s_img_*_{number}.jpg")
+    paths = glob.glob(file)
+    if len(paths) < 1:
+        print("Error can't find image")
+        exit(1)
+    return paths
 
 
-def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix=""):
+def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
     outputfolder = folder
     duration = (end_timestamp-start_timestamp) * 10**-9
     print("Recording for", duration, " seconds")
@@ -33,63 +44,104 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix=""):
     for temp in temps:
         os.remove(temp)
 
-
     turn_light(True)
+
     ## Waiting the good time
     while time.time_ns() < start_timestamp:
         time.sleep(0.0001)
     
-    start = time.time_ns()
-    print(f"Starting shot at {start}")
+    print("Starting shot ",time.time_ns())
+    timestamps = launch(end_timestamp)
+    
+    ## Wait a bit
+    # time.sleep(1)
 
-    buffer = launch(duration * 1e9)
 
     ##Convert to img
     converter = subprocess.Popen(convert_cmd.split(" "))
     converter.wait()
     ##Read metadata and processing
-    paths = []
-    # with open(metadata_path,"r") as file:
-    img_timestamps = buffer
-    img_paths = sorted(glob.glob(os.path.join(outputfolder, "temp*.jpg")))
-    print(len(img_paths), " ",len(img_timestamps))
-    if(len(img_paths) != len(img_timestamps)):
-        print(len(img_paths), len(img_timestamps))
-        if abs(len(img_paths) - len(img_timestamps) > 1):
-            print("Found more or less image than loaded metadata, have you cleaned your output folder ?")
-            exit(1)
-        else:
-            if(len(img_paths) > len(img_timestamps)):
-                #More img than properties deleting img
-                img_paths.pop(-1)
-            else:
-                #More metadata than img pop metadatas
-                img_timestamps.pop(-1)
-
     imgs = []
     print("Processing images ...")
+    img_paths = sorted(glob.glob(os.path.join(outputfolder, "temp*.jpg"))) 
     for img_path in img_paths:
         img = cv.imread(img_path)
         img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
         # img = cv.fastNlMeansDenoising(img, 5, 3)
         img = PROCESSOR.process(img)
         imgs.append(img)
-        print(f"{round((len(imgs)/len(img_paths)) * 100)}% completed\r")
+        print(f"{round((len(imgs)/len(img_paths)) * 100)}% completed")
+
+    paths = []
+    if abs(len(timestamps) - len(img_paths)) >= 5:
+        print("Differents timestamp code founded than picture numbers ",len(timestamps), " ",len(img_paths))
+        exit(1)
+
+    while len(timestamps) != len(img_paths):
+        if len(timestamps) > len(img_paths):
+            timestamps.pop(-1)
+        else:
+            img_paths.pop(-1)
+
+
+
 
     print("Saving images ...")
-    for img, img_path, ts_shifted in zip(imgs, img_paths, img_timestamps):
+    for img, img_path, shift in zip(imgs, img_paths,timestamps):
         cv.imwrite(img_path, img)
-        ts=SYSTEM_BOOTED + ts_shifted
-        new_path =  os.path.join(outputfolder, f"{prefix}_img_{ts}_{suffix}.jpg")
+        ts= shift
+        new_path =  os.path.join(outputfolder, f"{prefix}_img_{int(ts)}_{suffix}.jpg")
         os.rename(img_path,new_path)
         paths.append(new_path)
-    ##Cleaning
-    # os.remove(video_path)
-    # os.remove(metadata_path)
     
     time.sleep(3)
 
-    return paths
+    if not(is_master()):
+        return paths
+
+    s_paths = fetch_shot(CONFIG, suffix)
+    s_timestamps = []
+    for s_path in s_paths:
+        s_timestamps.append(extract_timestamp(s_path.split("/")[-1]))
+
+    try:
+        m_paths = np.array(paths)
+        s_paths = np.array(s_paths)
+    except ValueError as e:
+        print("Erreur : ",e)
+
+    
+
+
+
+    m_timestamps = np.array([int(ts) for ts in timestamps])
+    s_timestamps = np.array([int(ts) for ts in s_timestamps])
+
+    m_data = np.column_stack((m_paths,m_timestamps))
+    s_data = np.column_stack((s_paths,s_timestamps))
+
+
+    print(f"Fetched {len(m_data)} for master and {len(s_data)} for slave")
+
+    
+    min_ts = max(m_timestamps.min(), s_timestamps.min())
+    max_ts = min(m_timestamps.max(), s_timestamps.max())
+    print(f"Range of interest : [{min_ts} : {max_ts}]")
+    m_data_filtered = m_data[(m_timestamps >= min_ts) & (m_timestamps <= max_ts)]
+
+    s_data_filtered = s_data[(s_timestamps >= min_ts) & (s_timestamps <= max_ts)]
+    
+    m_remove = m_data[(m_timestamps < min_ts) | (m_timestamps > max_ts)]
+    s_remove = s_data[(s_timestamps < min_ts) | (s_timestamps > max_ts)]
+
+    print(f"Interesting range is {len(m_data_filtered)} for master and {len(s_data_filtered)} for slave ({round((max_ts-min_ts)*1e-9, 2)} s )")
+
+    print("Cleaning...")
+
+    [os.remove(path) for path in m_remove[:,0]]
+    [os.remove(path) for path in s_remove[:,0]]
+
+    return m_data_filtered[:,0], s_data_filtered[:,0], (min_ts,max_ts)
 
     
 
@@ -100,13 +152,5 @@ def send_shot(sock, start_timestamp, end_timestamp, config, suffix=""):
     sock.sendto(message, (config["slave_camera"]["camera_address"], config["socket_port"]))
 
 
-def fetch_shot(config, number):
-    proc = os.system(f'scp {config["slave_camera"]["camera_host"]}@{config["slave_camera"]["camera_address"]}:{config["slave_camera"]["temp_directory"]}/s_img_* {config["master_camera"]["temp_directory"]}')
-    file = os.path.join(config["master_camera"]["temp_directory"],f"s_img_*_{number}.jpg")
-    paths = glob.glob(file)
-    if len(paths) < 1:
-        print("Error can't find image")
-        exit(1)
-    return paths
 
 
