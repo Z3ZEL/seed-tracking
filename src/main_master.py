@@ -132,7 +132,7 @@ def main():
         start_timestamp = time.time_ns() + 1*10**9
         end_timestamp = start_timestamp + 4*10**9 # last 2 seconds
 
-            send_shot(sock, start_timestamp, end_timestamp, config, suffix=number)
+        send_shot(sock, start_timestamp, end_timestamp, config, suffix=number)
 
         m_paths, s_paths, roi = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
         m_paths = sorted(m_paths)
