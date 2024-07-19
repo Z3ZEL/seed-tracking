@@ -76,7 +76,7 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
 
     ##Import the seed position computer
     seedposition_algorithm = import_module("computations."+config['seed_computing']['seed_position_algorithm'])
-    params = config["seed_computing"]["seed_position_algorithm_params"]
+    params = config["seed_computing"]["seed_position_params"]
     
     seedPosition : ImageComputer = seedposition_algorithm.Computer(**params)
 
@@ -281,6 +281,18 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     return m_computed, s_computed
 
 def calculate_velocity(m_computed, s_computed, config, **kwargs):
+    '''
+    Calculate the velocity of the seeds in the images.
+
+
+    Args:
+        m_computed (list): List of computed master positions.
+        s_computed (list): List of computed slave positions.
+
+    Returns:
+        velocity (float): The computed
+        error (float): The error of the computed velocity
+    '''
         
     ##Import velocity computer
     velocity_algorithm = import_module("computations."+config['seed_computing']['velocity_algorithm'])

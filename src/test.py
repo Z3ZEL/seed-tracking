@@ -3,6 +3,7 @@ import glob,os,sys
 from actions.calculate import calculate_real_world_position, calculate_velocity
 from resource_manager import CONFIG
 import args
+import numpy as np
 
 
 print("########## SEED TRACKING TEST ##########")
@@ -19,7 +20,7 @@ def parse_test_file(test_path):
         params = file.read().split(",")
         for param in params:
             key, value = param.split(":")
-            temp[key] = int(value)
+            temp[key] = float(value)
     return temp
 
 def silencer_activate():
@@ -28,13 +29,17 @@ def silencer_activate():
 def silencer_deactivate():
     sys.stdout = sys.__stdout__
             
-global_seed_recognition_accuracy = 0
+global_seed_recognition_current = 0
+global_seed_recognition_theorical = 0
+global_error_marging = 0
 
+global_seed_velocity = np.empty((0,2))
 
 def test_case(zip_path):
     silencer_activate()
-    global global_seed_recognition_accuracy
-
+    global global_seed_recognition_current, global_seed_recognition_theorical
+    global global_error_marging
+    global global_seed_velocity
     zip_name = zip_path.split('/')[-1].split('.')[0]
     with ZipFile(zip_path, 'r') as zip_ref:
         zip_ref.extractall("test/temp")
@@ -56,14 +61,18 @@ def test_case(zip_path):
     silencer_deactivate()
 
     
-    print(f"Detected {len(m_computed)} seeds out of {info['m']}")
-    print(f"Detected {len(s_computed)} seeds out of {info['s']}")
+    print(f"Master : detected {len(m_computed)} seeds out of {info['m']} / Slave : detected {len(s_computed)} seeds out of {info['s']}")
     print(f"Expected velocity: {info['v']}, Computed velocity: {velocity[0]}")
 
 
-    ##TODO: take consideration more seed than expected
-    global_seed_recognition_accuracy += (len(m_computed) + len(s_computed))/(info['m'] + info['s'])
+    global_seed_recognition_current += (info["m"] - abs(len(m_computed) - info['m']))  + (info["s"] - abs(len(s_computed) - info['s']))
+    global_seed_recognition_theorical += info["m"] + info["s"]
+    global_error_marging += velocity[1]
 
+    if info['v'] != -1:
+        global_seed_velocity = np.append(global_seed_velocity, [[info['v'], velocity[0]]], axis=0)
+    
+        
 
 
 
@@ -77,8 +86,10 @@ for test_zip in test_zips:
 os.system("rm -rf test/temp")
 
 print("Final result :")
-print(f"Seed recognition accuracy : {round(global_seed_recognition_accuracy/len(test_zips)*100,2)}%")
-
+print(f"Seed recognition accuracy : {round((global_seed_recognition_current/global_seed_recognition_theorical)*100,2)}%")
+print(f"Average error margin : {round(global_error_marging/len(test_zips),3)}")
+if len(global_seed_velocity) > 0:   
+    print(f"Average velocity error : {round(np.mean(np.abs(global_seed_velocity[:,0] - global_seed_velocity[:,1])),3)}")
 
 print("########## END SEED TRACKING TEST ##########")
 

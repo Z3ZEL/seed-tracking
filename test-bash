@@ -1,0 +1,8 @@
+#/bin/bash
+# Get the full path of the script
+SCRIPT_PATH=$(realpath "$0")
+# Use dirname to get the directory path of the script
+SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
+
+source "$SCRIPT_DIR/.env/bin/activate"
+python src/test.py "$@"
