@@ -5,6 +5,7 @@ config = resource_manager.CONFIG
 import matplotlib.pyplot as plt
 
 def release_imgs(m_paths, s_paths):
+    print("Removed imgs")
     resource_manager.delete_paths(m_paths)
     resource_manager.delete_paths(s_paths)
 
@@ -24,6 +25,8 @@ def get_highest_number(directory):
                     highest_number = number
 
     return highest_number
+
+
 
 def plot_seed_positions(m_computed, s_computed):
     import matplotlib.dates as mdates
@@ -143,8 +146,6 @@ def main():
             for i in range(len(s_paths)):
                 s_data.append((i,resource_manager.extract_timestamp(s_paths[i].split("/")[-1])))
             
-            import matplotlib.pyplot as plt
-
             m_data = np.array(m_data)
             s_data = np.array(s_data)
 
@@ -213,14 +214,12 @@ def main():
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         
         number = int(input("Enter an ID number"))
-        duration = 3
+        duration = 4
         input("Input press enter to start multiple shot")
         start_timestamp = time.time_ns() + 1*1e9
-        s_start_timestamp = int(start_timestamp + 0*1e9)
-        end_timestamp = start_timestamp + duration * 10**9 # last 2 seconds
-        s_end_timestamp = int(s_start_timestamp + duration * 1e9)
+        end_timestamp = start_timestamp + (duration * 1e9 )
 
-        send_shot(sock, s_start_timestamp, s_end_timestamp, config, suffix=number)
+        send_shot(sock, int(start_timestamp), int(end_timestamp), config, suffix=number)
 
         m_paths, s_paths, roi = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
         
@@ -238,6 +237,7 @@ def main():
         except SystemExit:
             if kwargs["dry_run"]:
                 release_imgs(m_paths, s_paths)
+            exit(1)
         if kwargs['plot']:
             plot_seed_positions(m_computed, s_computed)
 

@@ -30,7 +30,7 @@ FOLDER = CONFIG["master_camera"]["temp_directory"] if is_master() else CONFIG["s
 VIDEO_PATH = os.path.join(FOLDER,"output.h264")
 # PTS = os.path.join(FOLDER,"pts.txt")
 # METADATA_PATH = os.path.join(FOLDER,"metadata.json")
-make_shot_cmd = lambda duration :  f"rpicam-vid -s --metadata - --level 4.2 --framerate {framerate} --width {res[0]} --height {res[1]} -o {VIDEO_PATH} --shutter {camera_conf['controls']['ExposureTime']} -t {duration}  -n" #--denoise cdn_off -t {duration * 10**3}
+make_shot_cmd = lambda duration :  f"rpicam-vid --autofocus-mode manual --autofocus-range macro -s --metadata - --level 4.2 --framerate {framerate} --width {res[0]} --height {res[1]} -o {VIDEO_PATH} --shutter {camera_conf['controls']['ExposureTime']} -t {duration}  -n" #--denoise cdn_off -t {duration * 10**3}
 # PHOTOGRAPHER = subprocess.Popen(shot_cmd.split(" "))
 
 print(make_shot_cmd(0   ))

@@ -111,11 +111,7 @@ def calibrating_control(config: dict, realtime_testing):
 
         send_shot(sock, target_timestamp, config, suffix = target_timestamp)        
         
-        m_path = shot(config["master_camera"]["temp_directory"],target_timestamp, suffix=target_timestamp)
-
-        time.sleep(0.5)
-
-        s_path = fetch_shot(config, target_timestamp)
+        m_path, s_path = shot(config["master_camera"]["temp_directory"],target_timestamp, suffix=target_timestamp)
 
         m_img = cv.imread(m_path)
         s_img = cv.imread(s_path)

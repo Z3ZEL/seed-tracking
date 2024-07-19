@@ -73,7 +73,7 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
         print(f"{round((len(imgs)/len(img_paths)) * 100)}% completed")
 
     paths = []
-    if abs(len(timestamps) - len(img_paths)) >= 2:
+    if abs(len(timestamps) - len(img_paths)) >= 5:
         print("Differents timestamp code founded than picture numbers ",len(timestamps), " ",len(img_paths))
         exit(1)
 

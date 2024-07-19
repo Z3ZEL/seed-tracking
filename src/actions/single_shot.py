@@ -52,7 +52,7 @@ def shot(outputfolder, start_timestamp, prefix="m", suffix=""):
         time.sleep(0.0001)
     
    
-    launch(0.5 * 1e9)
+    launch(start_timestamp + 2 * 1e9)
 
     converter = subprocess.Popen(convert_cmd.split(" "))
     converter.wait()

@@ -12,6 +12,28 @@ import cv2,os
 import re
 import numpy as np
 import random
+def plot_frame_with_timestamp(frames, timestamps, seed_timestamps):
+    import matplotlib.pyplot as plt
+
+    plt.scatter(frames,timestamps, color="cornflowerblue", label="Frame")
+
+    seed_frame_timestamps = []
+
+    index = []
+
+    for i in range(len(frames)):
+        for ts in seed_timestamps:
+            if timestamps[i] == ts:
+                index.append(i)
+
+
+
+    index = sorted(index)
+
+    plt.axvline(x=index[0], color='r')
+    plt.axvline(x=index[-1], color='r')
+
+    plt.scatter(index, seed_timestamps, color="red", label="Seed founded")
 def extract_timestamp(filename):
 
     # Expression régulière pour extraire le timestamp
@@ -143,7 +165,7 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
         print("There must be at least one seed detected on both camera")
         exit(1)
 
-
+    
     ## Cleaning dataset
 
     print("Cleaning dataset")
@@ -153,7 +175,11 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
 
     m_savePos, s_savePos = data_cleaner.compute(m_savePos, s_savePos)
     
-    
+    if kwargs['plot']:
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=(10,6))
+        plot_frame_with_timestamp([i for i in range(len(m_imgs))], [ts for name,ts in m_img_datas], [ts for pos,ts in m_savePos])
+        plot_frame_with_timestamp([i for i in range(len(s_imgs))], [ts for name,ts in s_img_datas], [ts for pos,ts in s_savePos])
 
     ## Compute a mean of X of both master and slave to provide a reference for the other when triangulating
     m_x_mean = np.median([pos[0] for pos, ts in m_savePos])
@@ -172,9 +198,12 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     if kwargs['plot']:
         from matplotlib import pyplot as plt
 
+        plt.figure(figsize=(10,6))
+
         m_pos = np.array([pos for pos, ts in m_savePos])
         s_pos = np.array([pos for pos, ts in s_savePos])
-        print(m_pos)
+        
+
         plt.plot(m_pos[:,0], m_pos[:,1], 'ro')
         plt.plot(s_pos[:,0], s_pos[:,1], 'bo')
 
