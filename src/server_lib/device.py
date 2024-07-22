@@ -4,8 +4,11 @@ from uuid import uuid4, UUID
 from time import sleep
 from server_lib import device_exception
 from server_lib.session_record_manager import Record, SessionRecordManager
+from server_lib.memory_manager import MemoryManager
 from server_lib.csv_builder import CSVBuilder
 from server_lib.record_launching import RecordLauncher
+
+from resource_manager import CONFIG
 class DeviceStatus(Enum):
     READY = 1
     BUSY = 2
@@ -23,32 +26,39 @@ class Device:
         self._status : DeviceStatus = DeviceStatus.WAITING
         self._sessions : List[UUID] = []
         self._records_manager = SessionRecordManager()
+        self._memory_manager = MemoryManager(CONFIG["server"]["directory"], CONFIG["server"]["temp_directory"])
+        self._last_error : device_exception.DeviceException = None
+
+    @property
+    def memory_manager(self):
+        return self._memory_manager
 
     @property
     def current_session(self):
         return self._sessions[0] if len(self._sessions) > 0 else None
 
     def status(self, session_id: UUID = None) -> DeviceStatus:
-        if self._status != DeviceStatus.WAITING and session_id != None:
-            if session_id == self.current_session:
-                return self._status
-            else:
-                return DeviceStatus.BUSY
-        else:
-            return self._status
+       return self._status
+    
+    def change_current_session(self, new_current_session : UUID) :
+        self._sessions.remvoe(new_current_session)
+        self._sessions.insert(0, new_current_session)
 
     def change_status(self, status: DeviceStatus):
-        self._status = status
+        if status == DeviceStatus.READY and len(self._sessions) <= 0:
+            self._status = DeviceStatus.WAITING
+        else:
+            self._status = status
 
     def remove_session(self, session_id: UUID):
         self._sessions.remove(session_id)
         if len(self._sessions) == 0:
             self._status = DeviceStatus.WAITING
 
-    def raise_error(self, error_message: str):
+    def raise_error(self, error : device_exception.DeviceException):
+        print(f"[ERROR] [{error.error_code}] {str(error)}")
+        self._last_error = error
         self._status = DeviceStatus.ERROR
-        self._sessions = []
-        raise device_exception.DeviceInternalException(error_message)
 
     def check_current_session(func):
         '''
@@ -90,7 +100,7 @@ class Device:
 
 
 
-    def start_session(self) -> str:
+    def start_session(self, researcher_id : str = None) -> str:
         '''
             Start a session with the device, return the session ID (uuid)
 
@@ -104,7 +114,7 @@ class Device:
             self._status = DeviceStatus.READY
 
         #Records manager init
-        self._records_manager.init_session(_session_id)
+        self._records_manager.init_session(_session_id, researcher_id)
 
         return _session_id
 
@@ -113,31 +123,29 @@ class Device:
         '''
             Stop a session with the device
 
-            This function is not protected, everyone can stop a session
+            This function is not protected, everyone can stop its session
         '''
 
         self.remove_session(session_id)
         self._records_manager.stop_session(session_id)
+        self._memory_manager.release_session(session_id)
 
 
-
-    @check_current_session
+    @check_session
     @check_status(DeviceStatus.READY)
-    def start_record(self, session_id: UUID, duration: int):
+    def start_record(self, session_id: UUID, duration: int, delay: int = 2, seed_id : str = None):
         '''
-            Start a recording session
+            Start a recording session, everyone who has a valid session can start a record.
         '''
         ## Change status
-        # self.change_status(DeviceStatus.RECORDING)
+        self.change_status(DeviceStatus.RECORDING)
 
         ## Auto valid last record
         self._records_manager.validate_record(session_id)
 
-        print(f"[DEVICE] Recording started for {duration} seconds")
-
         ## Adding recording and computing here thread based
-
-        record_launcher = RecordLauncher(self, self._records_manager, session_id)
+        
+        record_launcher = RecordLauncher(self, self._records_manager, self._memory_manager, session_id, 4, delay = delay, seed_id = seed_id)
         record_launcher.start()
 
         
@@ -176,8 +184,15 @@ class Device:
         records = self._records_manager.get_records(session_id)
         if records == None:
             raise device_exception.NoRecordFound()
-        return CSVBuilder.build(records)
+        return CSVBuilder.build(records, str(session_id), researcher_id = self._records_manager.get_linked_researcher(session_id))
 
+    @check_current_session
+    @check_status(DeviceStatus.ERROR)
+    def get_error_and_release(self, session_id: UUID) -> device_exception.DeviceException:
+        self.change_status(DeviceStatus.READY)
+        
+
+        return {"error_code" : self._last_error.error_code, "error_message" : str(self._last_error)}
 
 
 
