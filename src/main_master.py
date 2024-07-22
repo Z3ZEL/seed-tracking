@@ -200,15 +200,13 @@ def main():
             if kwargs["dry_run"]:
                 release_imgs(m_paths, s_paths)
             exit(1)
-        if kwargs['plot']:
-            plot_seed_positions(m_computed, s_computed)
 
-
-            if len(m_computed) <=1 or len(s_computed) <= 1:
-                print("Must be at least 2 seeds for boths")
-                if kwargs["dry_run"]:
-                    release_imgs(m_paths, s_paths)
-                exit(1)
+            
+        if len(m_computed) <=1 or len(s_computed) <= 1:
+            print("Must be at least 2 seeds for boths")
+            if kwargs["dry_run"]:
+                release_imgs(m_paths, s_paths)
+            exit(1)
 
         try:
             velocity, error = calculate_velocity(m_computed, s_computed, config, **kwargs)

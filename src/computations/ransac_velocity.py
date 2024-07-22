@@ -75,7 +75,7 @@ class Computer(VelocityComputer):
 
             if not self._dry_run:
                 import os
-                plt.savefig(os.path.join(config["master_camera"]["temp_directory"], f"plot_{id}_velocity.png"))
+                plt.savefig(os.path.join(config["master_camera"]["temp_directory"], f"plot_velocity.png"))
 
 
         m_velocity = m_ransac.estimator_.coef_
