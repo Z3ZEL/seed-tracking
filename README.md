@@ -26,6 +26,8 @@ This is the main repository for the Seed Tracker project. Which is an open sourc
 ## Prerequisites
   A ssh connection to the Raspberry Pi is required. Your raspberry must be also connected to each other via a network.
 
+  To install the python environnment juste run the `install.sh` script. It will install all the required packages for the project. 
+
 ## On a regular computer for development
 
 ## On the Master RPI
@@ -53,6 +55,15 @@ This is the main repository for the Seed Tracker project. Which is an open sourc
  > See the wiki [here](https://eng-git.canterbury.ac.nz/fgi18/seed-tracking/-/wikis/Quick-Start-(Using-the-Instrument)/CLI-Commands)
   
 
+  But basically you can run the following commands : 
+  ```bash
+  ./seed-eater-bash 
+  ```
+
+  and put options you want to run the tool you  want to use.
+
+  Use `./seed-eater-bash -h` to see the help message.
+
 # Development of the Seed Tracker
 
   The Seed Tracker which is the set of algorithms that are used to track the seed, get its world position and compute the velocity are in work in progress.
@@ -79,3 +90,7 @@ This is the main repository for the Seed Tracker project. Which is an open sourc
   ``` 
   m stand for the number of seeds in the master images, s for the number of seeds in the slave images and v for the velocity of the seeds. If you don't know the real velocity of the seed on the sample you can put `-1`.
 
+  To run the test you can run the following command : 
+  ```bash
+  ./test-bash
+  ```

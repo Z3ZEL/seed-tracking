@@ -1,9 +1,11 @@
 from interfaces.numerical_computing.velocity_computer import VelocityComputer
 from sklearn.linear_model import RANSACRegressor
 import numpy as np
+from resource_manager import CONFIG as config
 
 class Computer(VelocityComputer):
     def __init__(self, **kwargs) -> None:
+        self._dry_run = kwargs["dry_run"]
         super().__init__(**kwargs)
     
     def compute(self, m_vector4, s_vector4) -> tuple[float, float]:
@@ -69,6 +71,11 @@ class Computer(VelocityComputer):
             ax.set_xlabel('Time')
             ax.set_ylabel('Y')
             ax.legend(loc='lower right')
+
+
+            if not self._dry_run:
+                import os
+                plt.savefig(os.path.join(config["master_camera"]["temp_directory"], f"plot_{id}_velocity.png"))
 
 
         m_velocity = m_ransac.estimator_.coef_

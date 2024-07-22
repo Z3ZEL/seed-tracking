@@ -34,6 +34,21 @@ def fetch_shot(config, number):
 
 
 def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
+    '''
+    Take a shot and save it in the output folder
+
+    Parameters:
+    outputfolder (str): The output folder
+    start_timestamp (int): The start timestamp
+    end_timestamp (int): The end timestamp
+    prefix (str): The prefix of the image
+    suffix (str): The suffix of the image
+
+    Returns:
+    list: Master image paths
+    list: Slave image paths
+    roi : Range of interest (min, max)
+    '''
     outputfolder = folder
     duration = (end_timestamp-start_timestamp) * 10**-9
     print("Recording for", duration, " seconds")

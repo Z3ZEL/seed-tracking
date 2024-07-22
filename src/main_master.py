@@ -27,39 +27,6 @@ def get_highest_number(directory):
     return highest_number
 
 
-
-def plot_seed_positions(m_computed, s_computed):
-    import matplotlib.dates as mdates
-    import numpy as np
-    from datetime import datetime
-
-    m_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in m_computed]
-    s_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in s_computed]
-    
-    # Extracting timestamps and y positions
-    m_timestamps = [item[0] for item in m_computed_plot]
-    m_y_positions = [item[1] for item in m_computed_plot]
-    s_timestamps = [item[0] for item in s_computed_plot]
-    s_y_positions = [item[1] for item in s_computed_plot]
-
-  
-    # Plotting
-    plt.figure(figsize=(10, 6))
-    plt.plot(m_timestamps, m_y_positions, 'o-', label='Computed Y Position')
-    plt.plot(s_timestamps, s_y_positions, 'x-', label='Computed Y Position')
-
-    # Formatting the plot
-    plt.xlabel('Timestamp')
-    plt.ylabel('Y Position')
-    plt.title('Computed Y Position Over Time')
-    plt.legend()
-
-    # Improve formatting of timestamps on the x-axis
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
-    plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
-    plt.gcf().autofmt_xdate()
-
-
 def main():
     kwargs = vars(args.parse_args())
     print(kwargs)
@@ -73,11 +40,8 @@ def main():
         camera_test()
         exit(0)
     if(kwargs['clean']):
-        import os
-        folder = config["master_camera"]["temp_directory"]
-        for filename in os.listdir(folder):
-            if filename.endswith('.jpg'):
-                os.remove(os.path.join(folder, filename))
+        from actions.clean import clean
+        clean(config)
         exit(0)
     if(kwargs["shot"] == "single"):
         import time,os, socket
@@ -164,6 +128,7 @@ def main():
         from camera import camera_test
 
         camera_test()
+        exit(0)
         
     if(kwargs['calibrate']):
         from actions.calibrate import calibrate
@@ -191,9 +156,6 @@ def main():
 
         m_computed, s_computed = calculate_real_world_position(m_paths, s_paths, config, **kwargs)
 
-        if kwargs['plot']:
-            plot_seed_positions(m_computed, s_computed)
-
         velocity, error = calculate_velocity(m_computed, s_computed, config, **kwargs)
 
 
@@ -201,7 +163,7 @@ def main():
 
 
         # Plotting
-        if kwargs['plot']:
+        if kwargs['plot']  and kwargs["display"]:
             plt.show()
         exit(0)
 
@@ -263,9 +225,13 @@ def main():
             for path in m_paths + s_paths:
                 os.remove(path)
 
-        if kwargs["plot"]:
+        if kwargs["plot"] and kwargs["display"]:
             plt.show()
         exit(0)
 
+    ##############
 
+    import server
+
+    server.app.run(host=config["server"]["host"], port=config["server"]["port"], debug=True)
     

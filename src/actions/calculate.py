@@ -11,9 +11,9 @@ from importlib import import_module
 import cv2,os
 import re
 import numpy as np
-import random
+import matplotlib.pyplot as plt
+
 def plot_frame_with_timestamp(frames, timestamps, seed_timestamps, is_master=True):
-    import matplotlib.pyplot as plt
 
     plt.scatter(frames,timestamps, color="cornflowerblue" if is_master else "navy", label="Frame")
 
@@ -34,6 +34,37 @@ def plot_frame_with_timestamp(frames, timestamps, seed_timestamps, is_master=Tru
     plt.axvline(x=index[-1], color='r')
 
     plt.scatter(index, seed_timestamps, color="red" if is_master else 'darkred', label="Seed founded")
+
+def plot_seed_positions(m_computed, s_computed):
+    import matplotlib.dates as mdates
+    import numpy as np
+    from datetime import datetime
+
+    m_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in m_computed]
+    s_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in s_computed]
+    
+    # Extracting timestamps and y positions
+    m_timestamps = [item[0] for item in m_computed_plot]
+    m_y_positions = [item[1] for item in m_computed_plot]
+    s_timestamps = [item[0] for item in s_computed_plot]
+    s_y_positions = [item[1] for item in s_computed_plot]
+
+  
+    # Plotting
+    plt.figure(figsize=(10, 6))
+    plt.plot(m_timestamps, m_y_positions, 'o-', label='Computed Y Position')
+    plt.plot(s_timestamps, s_y_positions, 'x-', label='Computed Y Position')
+
+    # Formatting the plot
+    plt.xlabel('Timestamp')
+    plt.ylabel('Y Position')
+    plt.title('Computed Y Position Over Time')
+    plt.legend()
+
+    # Improve formatting of timestamps on the x-axis
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
+    plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
+    plt.gcf().autofmt_xdate()
 def extract_timestamp(filename):
 
     # Expression régulière pour extraire le timestamp
@@ -176,10 +207,11 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     m_savePos, s_savePos = data_cleaner.compute(m_savePos, s_savePos)
     
     if kwargs['plot']:
-        import matplotlib.pyplot as plt
         plt.figure(figsize=(10,6))
         plot_frame_with_timestamp([i for i in range(len(m_imgs))], [ts for name,ts in m_img_datas], [ts for pos,ts in m_savePos])
         plot_frame_with_timestamp([i for i in range(len(s_imgs))], [ts for name,ts in s_img_datas], [ts for pos,ts in s_savePos], is_master=False)
+        if not kwargs["dry_run"]:
+            plt.savefig(os.path.join(config["master_camera"]["temp_directory"], f"plot_{id}_sync.png"))
 
     ## Compute a mean of X of both master and slave to provide a reference for the other when triangulating
     m_x_mean = np.median([pos[0] for pos, ts in m_savePos])
@@ -196,8 +228,6 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     
 
     if kwargs['plot']:
-        from matplotlib import pyplot as plt
-
         plt.figure(figsize=(10,6))
 
         m_pos = np.array([pos for pos, ts in m_savePos])
@@ -214,6 +244,8 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
         # Add legend
         plt.legend(["Master Camera", "Slave Camera", "Master Camera Mean", "Slave Camera Mean"])
 
+        if not kwargs["dry_run"]:
+            plt.savefig(os.path.join(config["master_camera"]["temp_directory"], f"plot_{id}_mean.png"))
         
 
 
@@ -260,7 +292,7 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
 
 
     ## Plot 
-    if kwargs["plot"]:
+    if kwargs["display"]:
         for im in m_saveIms:
             cv2.imshow("Master", im)
             cv2.waitKey(500)
@@ -270,6 +302,11 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
             cv2.imshow("Slave", im)
             cv2.waitKey(500)
             cv2.destroyAllWindows()
+
+    if kwargs['plot']:
+        plot_seed_positions(m_computed, s_computed)
+        if not kwargs["dry_run"]:
+            plt.savefig(os.path.join(config["master_camera"]["temp_directory"], f"plot_{id}_positions.png"))
     
 
     print("Master computed points")
