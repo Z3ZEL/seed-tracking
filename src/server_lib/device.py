@@ -9,7 +9,7 @@ from server_lib.csv_builder import CSVBuilder
 
 from args import get_args_dict
 
-if get_args_dict()["test"]:
+if get_args_dict()["dev"]:
     from server_lib.record_launching_mock import RecordLauncher
 else:
     from server_lib.record_launching import RecordLauncher

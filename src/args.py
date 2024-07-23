@@ -12,7 +12,7 @@ PARSER.add_argument("--check-calibration", action="store_true", help="Launch the
 PARSER.add_argument("--camera-test", action="store_true", help="Launch a camera test given its configuration to check its performance", dest="camera_test", default=False, required=False)
 PARSER.add_argument("--calculate", action="store_true", help="Launch the seed velocity calculation depending on -i image separated by coma, master and slave. -o for output result", dest="calculate", default=False, required=False)
 PARSER.add_argument("--run", "-r", action="store_true", help="Run a velocity recording, it includes the shooting and the calculation of the seed speed", required=False, default=False)
-PARSER.add_argument("-t", "--test", action="store_true", help="Launch the server in test mode for development only. The device will be a mock one, meaning it won't use the real device, it produces fake data.", required=False, default=False)
+PARSER.add_argument("--dev", action="store_true", help="Launch the server in test mode for development only. The device will be a mock one, meaning it won't use the real device, it produces fake data.", required=False, default=False)
 PARSER.add_argument("-c","--clean", action="store_true", help="Clean the output folder", required=False, default=False)
 PARSER.add_argument("-s", "--slave", action="store_true", help="Launch the CLI in slave mode", required=False, default=False)
 def parse_args():
