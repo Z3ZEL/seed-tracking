@@ -6,7 +6,13 @@ from server_lib import device_exception
 from server_lib.session_record_manager import Record, SessionRecordManager
 from server_lib.memory_manager import MemoryManager
 from server_lib.csv_builder import CSVBuilder
-from server_lib.record_launching import RecordLauncher
+
+from args import get_args_dict
+
+if get_args_dict()["test"]:
+    from server_lib.record_launching_mock import RecordLauncher
+else:
+    from server_lib.record_launching import RecordLauncher
 
 from resource_manager import CONFIG
 class DeviceStatus(Enum):

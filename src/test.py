@@ -10,7 +10,7 @@ print("########## SEED TRACKING TEST ##########")
 
 
 test_zips = glob.glob("test/*.zip")
-kwargs = vars(args.parse_args())
+kwargs = args.get_args_dict()
 
 print(f"Found {len(test_zips)} cases")
 

@@ -28,7 +28,7 @@ def get_highest_number(directory):
 
 
 def main():
-    kwargs = vars(args.parse_args())
+    kwargs = args.get_args_dict()
     print(kwargs)
     plot = kwargs["plot"]
     verbose = kwargs["verbose"]
