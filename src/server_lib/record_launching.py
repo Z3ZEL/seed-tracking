@@ -1,11 +1,10 @@
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from server_lib.device import Device
-from server_lib.device_exception import DeviceRecordException
-from server_lib.session_record_manager import SessionRecordManager, Record
-from server_lib.memory_manager import MemoryManager
+
 import threading
 import time
+import uuid
 import cv2 as cv
 import glob
 import os
@@ -17,6 +16,9 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 import actions
 from resource_manager import CONFIG
 import args
+from server_lib.device_exception import DeviceRecordException
+from server_lib.session_record_manager import SessionRecordManager, Record
+from server_lib.memory_manager import MemoryManager
 
 ##headless
 import matplotlib
@@ -36,7 +38,7 @@ class RecordLauncher(threading.Thread):
         self._duration = duration
         self._delay = delay
         self._seed_id = seed_id
-        self._kwargs = vars(args.parse_args()) | {"plot":True}
+        self._kwargs = args.get_args_dict() | {"plot":True}
 
         actions.clean(CONFIG)
 
@@ -92,8 +94,8 @@ class RecordLauncher(threading.Thread):
         result_paths = glob.glob(os.path.join(CONFIG["master_camera"]["temp_directory"], "*_result_*.jpg"))
         plot_paths = glob.glob(os.path.join(CONFIG["master_camera"]["temp_directory"], "plot*.png"))
 
-        plots = [self._memory_manager.save_img(self._session_id, cv.imread(path), f"plot{i}.png") for path, i in zip(plot_paths, range(len(plot_paths)))]
-        results = [self._memory_manager.save_img(self._session_id, cv.imread(path), f"result{i}.png") for path, i in zip(result_paths, range(len(result_paths)))]
+        plots = [self._memory_manager.save_img(self._session_id, cv.imread(path), f"plot{str(uuid.uuid4())}.png") for path, i in zip(plot_paths, range(len(plot_paths)))]
+        results = [self._memory_manager.save_img(self._session_id, cv.imread(path), f"result{str(uuid.uuid4())}.png") for path, i in zip(result_paths, range(len(result_paths)))]
 
         ##...
 
