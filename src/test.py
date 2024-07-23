@@ -51,13 +51,17 @@ def test_case(zip_path):
 
     info = parse_test_file(f"test/temp/{zip_name}/test")   
 
-    m_computed, s_computed = calculate_real_world_position(m_paths, s_paths, CONFIG, **kwargs | {"dry_run":True})
+    try:
+        m_computed, s_computed = calculate_real_world_position(m_paths, s_paths, CONFIG, **kwargs | {"dry_run":True})
+    except SystemExit:
+        m_computed, s_computed = [], []
     
     
-    
-    
-    velocity = calculate_velocity(m_computed, s_computed, CONFIG, **kwargs | {"dry_run":True})
-    
+    try:
+        velocity = calculate_velocity(m_computed, s_computed, CONFIG, **kwargs | {"dry_run":True})
+    except SystemExit:
+        velocity = [-1,-1]
+
     silencer_deactivate()
 
     

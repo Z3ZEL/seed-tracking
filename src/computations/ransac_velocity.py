@@ -27,13 +27,15 @@ class Computer(VelocityComputer):
         s_X = s_vector4[:, 3].reshape(-1, 1)
         s_y = s_vector4[:, 1].reshape(-1, 1)
 
+        try:
+            m_ransac = RANSACRegressor()
+            m_ransac.fit(m_X, m_y)
+
+            s_ransac = RANSACRegressor()
+            s_ransac.fit(s_X, s_y)
+        except ValueError:
+            raise SystemExit("Error during RANSAC fitting, not enough data points")
         
-        m_ransac = RANSACRegressor()
-        m_ransac.fit(m_X, m_y)
-
-        s_ransac = RANSACRegressor()
-        s_ransac.fit(s_X, s_y)
-
         if self.plot:
             import matplotlib.pyplot as plt
             import matplotlib.dates as mdates

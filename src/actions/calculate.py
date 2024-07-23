@@ -334,6 +334,8 @@ def calculate_velocity(m_computed, s_computed, config, **kwargs):
     ##Import velocity computer
     velocity_algorithm = import_module("computations."+config['seed_computing']['velocity_algorithm'])
     ransac : VelocityComputer = velocity_algorithm.Computer(**kwargs)
-    velocity, error = ransac.compute(m_computed, s_computed)
-
+    try:
+        velocity, error = ransac.compute(m_computed, s_computed)
+    except SystemExit:
+        raise SystemExit("There was an error during the velocity computing")
     return velocity, error
