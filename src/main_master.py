@@ -2,7 +2,8 @@ import cv2
 import args
 import resource_manager 
 config = resource_manager.CONFIG
-import matplotlib.pyplot as plt
+from actions.plot import init_plot, show_plot
+
 
 def release_imgs(m_paths, s_paths):
     print("Removed imgs")
@@ -101,7 +102,8 @@ def main():
         m_paths, s_paths, roi = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
         m_paths = sorted(m_paths)
         s_paths = sorted(s_paths)
-        if(kwargs['plot']):
+        if(kwargs['display']):
+            from matplotlib import pyplot as plt
             m_data = []
             s_data = []
 
@@ -154,6 +156,9 @@ def main():
         m_path, s_path = tuple(args.get_input_folder().split(','))
         m_paths, s_paths = sorted(glob.glob(m_path)), sorted(glob.glob(s_path))
 
+        id : str = resource_manager.extract_id(m_paths[0].split("/")[-1])
+        init_plot(id)
+
         m_computed, s_computed = calculate_real_world_position(m_paths, s_paths, config, **kwargs)
 
         velocity, error = calculate_velocity(m_computed, s_computed, config, **kwargs)
@@ -162,9 +167,7 @@ def main():
         print(f"Estimated velocity : {round(velocity,3)} m/s +- {round(error,3)} m/s")
 
 
-        # Plotting
-        if kwargs['plot']  and kwargs["display"]:
-            plt.show()
+        show_plot()
         exit(0)
 
             
@@ -194,6 +197,8 @@ def main():
         m_paths = sorted(m_paths)
         s_paths = sorted(s_paths)
 
+        init_plot(str(number))
+
         try:
             m_computed, s_computed = calculate_real_world_position(m_paths, s_paths, config, **kwargs)
         except SystemExit:
@@ -219,12 +224,9 @@ def main():
 
         
         if(kwargs['dry_run']):
-            print("Deleting images")
-            for path in m_paths + s_paths:
-                os.remove(path)
+            release_imgs(m_paths, s_paths)
 
-        if kwargs["plot"] and kwargs["display"]:
-            plt.show()
+        show_plot()
         exit(0)
 
     ##############

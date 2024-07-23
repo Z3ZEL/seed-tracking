@@ -34,6 +34,9 @@ def extract_timestamp(filename):
         return int(timestamp)
     else:
         return None
+def extract_id(filename):
+    return filename.split('_')[-1].split(".")[0]
+    
 
 def load_camera_configuration() -> list[np.array, np.array, np.array, np.array, np.array, np.array]:
     '''

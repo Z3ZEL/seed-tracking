@@ -3,85 +3,15 @@ from computations import TriangulatePosition
 from optimizers import SmoothOptimizer, OptimizerApplier
 from interfaces.image_processing import Processor
 from common_layers import UndistortLayer
-from resource_manager import load_camera_configuration
+from resource_manager import load_camera_configuration, extract_timestamp, extract_id
 from interfaces.numerical_computing.velocity_computer import VelocityComputer
 from interfaces.image_computing.image_computer import ImageComputer
 from interfaces.numerical_computing.data_cleaner import DataCleaner
 from importlib import import_module
+from actions.plot import plot_frame_with_timestamp, plot_seed_positions, plot_mean_x
 import cv2,os
-import re
 import numpy as np
-import matplotlib.pyplot as plt
 
-def plot_frame_with_timestamp(frames, timestamps, seed_timestamps, is_master=True):
-
-    plt.scatter(frames,timestamps, color="cornflowerblue" if is_master else "navy", label="Frame")
-
-    seed_frame_timestamps = []
-
-    index = []
-
-    for i in range(len(frames)):
-        for ts in seed_timestamps:
-            if timestamps[i] == ts:
-                index.append(i)
-
-
-
-    index = sorted(index)
-
-    plt.axvline(x=index[0], color='r')
-    plt.axvline(x=index[-1], color='r')
-
-    plt.scatter(index, seed_timestamps, color="red" if is_master else 'darkred', label="Seed founded")
-
-def plot_seed_positions(m_computed, s_computed):
-    import matplotlib.dates as mdates
-    import numpy as np
-    from datetime import datetime
-
-    m_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in m_computed]
-    s_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in s_computed]
-    
-    # Extracting timestamps and y positions
-    m_timestamps = [item[0] for item in m_computed_plot]
-    m_y_positions = [item[1] for item in m_computed_plot]
-    s_timestamps = [item[0] for item in s_computed_plot]
-    s_y_positions = [item[1] for item in s_computed_plot]
-
-  
-    # Plotting
-    plt.figure(figsize=(10, 6))
-    plt.plot(m_timestamps, m_y_positions, 'o-', label='Computed Y Position')
-    plt.plot(s_timestamps, s_y_positions, 'x-', label='Computed Y Position')
-
-    # Formatting the plot
-    plt.xlabel('Timestamp')
-    plt.ylabel('Y Position')
-    plt.title('Computed Y Position Over Time')
-    plt.legend()
-
-    # Improve formatting of timestamps on the x-axis
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
-    plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
-    plt.gcf().autofmt_xdate()
-def extract_timestamp(filename):
-
-    # Expression régulière pour extraire le timestamp
-    pattern = r"[a-zA-Z]+_img_(\d+)_\d+\.jpg"
-
-    # Utiliser re.search pour trouver la correspondance
-    match = re.search(pattern, filename)
-    # Vérifier si une correspondance a été trouvée et extraire le timestamp
-    if match:
-        timestamp = match.group(1)
-        return int(timestamp)
-    else:
-        return None
-
-def extract_id(filename):
-    return filename.split('_')[-1].split(".")[0]
-    
 
 def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     '''
@@ -206,13 +136,11 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
 
     m_savePos, s_savePos = data_cleaner.compute(m_savePos, s_savePos)
     
-    if kwargs['plot']:
-        plt.figure(figsize=(10,6))
-        plot_frame_with_timestamp([i for i in range(len(m_imgs))], [ts for name,ts in m_img_datas], [ts for pos,ts in m_savePos])
-        plot_frame_with_timestamp([i for i in range(len(s_imgs))], [ts for name,ts in s_img_datas], [ts for pos,ts in s_savePos], is_master=False)
-        if not kwargs["dry_run"]:
-            plt.savefig(os.path.join(config["master_camera"]["temp_directory"], f"plot_{id}_sync.png"))
 
+    #PLOT
+    plot_frame_with_timestamp([i for i in range(len(m_imgs))], [ts for name,ts in m_img_datas], [ts for pos,ts in m_savePos], [i for i in range(len(s_imgs))], [ts for name,ts in s_img_datas], [ts for pos,ts in s_savePos])
+    
+    
     ## Compute a mean of X of both master and slave to provide a reference for the other when triangulating
     m_x_mean = np.median([pos[0] for pos, ts in m_savePos])
     s_x_mean = np.median([pos[0] for pos, ts in s_savePos])
@@ -226,28 +154,8 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     for pos, ts in s_savePos:
         print(np.linalg.norm(pos[0] - s_x_mean))
     
-
-    if kwargs['plot']:
-        plt.figure(figsize=(10,6))
-
-        m_pos = np.array([pos for pos, ts in m_savePos])
-        s_pos = np.array([pos for pos, ts in s_savePos])
-        
-
-        plt.plot(m_pos[:,0], m_pos[:,1], 'ro')
-        plt.plot(s_pos[:,0], s_pos[:,1], 'bo')
-
-        #Plot line representing the mean
-        plt.axvline(x=m_x_mean, color='r')
-        plt.axvline(x=s_x_mean, color='b')
-
-        # Add legend
-        plt.legend(["Master Camera", "Slave Camera", "Master Camera Mean", "Slave Camera Mean"])
-
-        if not kwargs["dry_run"]:
-            plt.savefig(os.path.join(config["master_camera"]["temp_directory"], f"plot_{id}_mean.png"))
-        
-
+    #Plot
+    plot_mean_x(m_savePos, s_savePos, m_x_mean, s_x_mean)
 
     
 
@@ -303,10 +211,8 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
             cv2.waitKey(500)
             cv2.destroyAllWindows()
 
-    if kwargs['plot']:
-        plot_seed_positions(m_computed, s_computed)
-        if not kwargs["dry_run"]:
-            plt.savefig(os.path.join(config["master_camera"]["temp_directory"], f"plot_{id}_positions.png"))
+    #PLOT
+    plot_seed_positions(m_computed, s_computed)
     
 
     print("Master computed points")
@@ -333,7 +239,8 @@ def calculate_velocity(m_computed, s_computed, config, **kwargs):
         
     ##Import velocity computer
     velocity_algorithm = import_module("computations."+config['seed_computing']['velocity_algorithm'])
-    ransac : VelocityComputer = velocity_algorithm.Computer(**kwargs)
+    velocity_params = config['seed_computing']['velocity_params'] if 'velocity_params' in config['seed_computing'] else {}
+    ransac : VelocityComputer = velocity_algorithm.Computer(**velocity_params)
     try:
         velocity, error = ransac.compute(m_computed, s_computed)
     except SystemExit:

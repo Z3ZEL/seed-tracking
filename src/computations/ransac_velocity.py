@@ -1,11 +1,11 @@
 from interfaces.numerical_computing.velocity_computer import VelocityComputer
 from sklearn.linear_model import RANSACRegressor
 import numpy as np
+from actions.plot import plot_velocity_line
 from resource_manager import CONFIG as config
 
 class Computer(VelocityComputer):
     def __init__(self, **kwargs) -> None:
-        self._dry_run = kwargs["dry_run"]
         super().__init__(**kwargs)
     
     def compute(self, m_vector4, s_vector4) -> tuple[float, float]:
@@ -36,48 +36,8 @@ class Computer(VelocityComputer):
         except ValueError:
             raise SystemExit("Error during RANSAC fitting, not enough data points")
         
-        if self.plot:
-            import matplotlib.pyplot as plt
-            import matplotlib.dates as mdates
-            from datetime import datetime, timedelta
+        plot_velocity_line(m_X, m_y,s_X,s_y, m_ransac, s_ransac)
             
-            # Assuming m_X and s_X are numpy arrays of UNIX timestamps
-            m_X_dates = [datetime.utcfromtimestamp(ts/1e9) for ts in m_X.flatten()]
-            s_X_dates = [datetime.utcfromtimestamp(ts/1e9) for ts in s_X.flatten()]
-            
-            fig, ax = plt.subplots()
-            
-            # Plotting outliers for m_X and s_X
-            outliers_m = np.logical_not(m_ransac.inlier_mask_)
-            outliers_s = np.logical_not(s_ransac.inlier_mask_)
-        
-            # Plotting inliers and RANSAC regressor for m_X
-            ax.scatter(m_X_dates, m_y, color='violet', marker='.', label='Inliers (m)')
-            m_X_dates_sorted, m_y_ransac_sorted = zip(*sorted(zip(m_X_dates, m_ransac.predict(m_X))))
-            ax.plot(m_X_dates_sorted, m_y_ransac_sorted, color='purple', linewidth=2, label='RANSAC regressor (m)')
-            
-            # Plotting inliers and RANSAC regressor for s_X
-            ax.scatter(s_X_dates, s_y, color='lightblue', marker='.', label='Inliers (s)')
-            s_X_dates_sorted, s_y_ransac_sorted = zip(*sorted(zip(s_X_dates, s_ransac.predict(s_X))))
-            ax.plot(s_X_dates_sorted, s_y_ransac_sorted, color='cornflowerblue', linewidth=2, label='RANSAC regressor (s)')
-
-
-            ax.scatter([m_X_dates[i] for i in range(len(m_X)) if outliers_m[i]], [m_y[i] for i in range(len(m_X)) if outliers_m[i]], color='darkmagenta', marker='.', label='Outliers (m)')
-            ax.scatter([s_X_dates[i] for i in range(len(s_X)) if outliers_s[i]], [s_y[i] for i in range(len(s_X)) if outliers_s[i]], color='darkblue', marker='.', label='Outliers (s)')
-            
-            # Formatting the date on the x-axis
-            ax.xaxis.set_major_locator(mdates.AutoDateLocator())
-            ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
-            fig.autofmt_xdate()
-            
-            ax.set_xlabel('Time')
-            ax.set_ylabel('Y')
-            ax.legend(loc='lower right')
-
-
-            if not self._dry_run:
-                import os
-                plt.savefig(os.path.join(config["master_camera"]["temp_directory"], f"plot_velocity.png"))
 
 
         m_velocity = m_ransac.estimator_.coef_
