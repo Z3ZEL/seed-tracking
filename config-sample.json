@@ -1,0 +1,47 @@
+{
+    "server" : {
+        "port" : 3000,
+        "host" : "localhost",
+        "temp_directory" : "/home/pi/server/temp",
+        "directory" : "/home/pi/server/"
+    },
+    "socket_port": 25565,
+    "seed_computing": {
+        "velocity_algorithm": "ransac_velocity",
+        "seed_position_algorithm" : "seed_position_contours",
+        "seed_position_params": {
+            "area_threshold": 10
+        },
+        "seed_position_data_cleaner_algorithm": "range_data_cleaner",
+        "seed_position_data_cleaner_params": {
+            "range": 30
+        }
+    },
+    "master_camera": {
+        "camera_address": "192.168.1.5",
+        "temp_directory": "/home/pi/temp"
+    },
+    "slave_camera": {
+        "camera_address": "192.168.1.6",
+        "camera_host": "pi",
+        "temp_directory": "/home/pi/temp"
+    },
+    "camera_setting": {
+        "framerate": 100,
+        "resolution": "(768,432)",
+        "controls": {
+            "ExposureTime": 300
+        }
+    },
+    "calibration": {
+        "checkerboard_size": "5x7",
+        "square_size": 1.5,
+        "reference": [
+            {
+                "m_pos": "(99,99)",
+                "s_pos": "(99,99)",
+                "distance": 30.0
+            }
+        ]
+    }
+}
