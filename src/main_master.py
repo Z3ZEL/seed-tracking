@@ -143,7 +143,7 @@ def main():
 
     if(kwargs['check_calibrate']):
         from actions.calibrating_control import calibrating_control
-        calibrating_control(config, kwargs["plot"])
+        calibrating_control(config, kwargs["display"])
         exit(0)
     
     if kwargs['calculate']:
