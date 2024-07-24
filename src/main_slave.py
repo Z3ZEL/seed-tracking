@@ -54,6 +54,8 @@ def main():
                 
                 multiple_shot(outputdir, start_timestamp, end_timestamp, prefix="s", suffix=number)
 
+                sock.sendto("done".encode('utf-8'), (CONFIG['master_camera']['camera_address'], CONFIG['socket_port']))
+
 
 
         except Exception as e:

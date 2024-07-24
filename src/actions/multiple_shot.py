@@ -9,6 +9,7 @@ import numpy as np
 from rpi_interaction import turn_light
 from resource_manager import is_master,extract_timestamp, CONFIG
 import json
+import socket
 from camera import PROCESSOR, VIDEO_PATH as video_path, FOLDER as folder, launch
 
 def trunc_json(json):
@@ -33,7 +34,7 @@ def fetch_shot(config, number):
     return paths
 
 
-def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
+def shot(outputfolder, start_timestamp, end_timestamp, sock:  socket.socket=None, prefix="m", suffix="0"):
     '''
     Take a shot and save it in the output folder
 
@@ -85,7 +86,10 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
         # img = cv.fastNlMeansDenoising(img, 5, 3)
         img = PROCESSOR.process(img)
         imgs.append(img)
+        print("\033[H\033[J", end="")
         print(f"{round((len(imgs)/len(img_paths)) * 100)}% completed")
+        #clear console
+        
 
     paths = []
     if abs(len(timestamps) - len(img_paths)) >= 5:
@@ -109,10 +113,19 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
         os.rename(img_path,new_path)
         paths.append(new_path)
     
-    time.sleep(3)
 
     if not(is_master()):
         return paths
+
+    print("Fetching slave images ...")
+
+    #Waiting for the slave to finish
+    res = sock.recv(1024)
+    if "done".encode('utf-8') not in res:
+        print("Error : ",res)
+        exit(1)
+
+
 
     s_paths = fetch_shot(CONFIG, suffix)
     s_timestamps = []

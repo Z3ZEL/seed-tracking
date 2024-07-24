@@ -99,7 +99,7 @@ def main():
 
         send_shot(sock, start_timestamp, end_timestamp, config, suffix=number)
 
-        m_paths, s_paths, roi = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
+        m_paths, s_paths, roi = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number, sock=sock)
         m_paths = sorted(m_paths)
         s_paths = sorted(s_paths)
         if(kwargs['display']):
@@ -186,7 +186,7 @@ def main():
 
         send_shot(sock, int(start_timestamp), int(end_timestamp), config, suffix=number)
 
-        m_paths, s_paths, roi = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
+        m_paths, s_paths, roi = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number, sock=sock)
         
         #If the real range captured is inferior of 50% of the requested duration, then exit
         if roi[1] - roi[0] < 0.2 * duration * 1e9: 
