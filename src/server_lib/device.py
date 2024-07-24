@@ -31,8 +31,8 @@ class Device:
     def __init__(self) -> None:
         self._status : DeviceStatus = DeviceStatus.WAITING
         self._sessions : List[UUID] = []
-        self._records_manager = SessionRecordManager()
         self._memory_manager = MemoryManager(CONFIG["server"]["directory"], CONFIG["server"]["temp_directory"])
+        self._records_manager = SessionRecordManager(self._memory_manager)
         self._last_error : device_exception.DeviceException = None
 
     @property
@@ -198,7 +198,7 @@ class Device:
         self.change_status(DeviceStatus.READY)
         
 
-        return {"error_code" : self._last_error.error_code, "error_message" : str(self._last_error)}
+        return {"error" : str(self._last_error)}, 400
 
 
 

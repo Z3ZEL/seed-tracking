@@ -7,21 +7,27 @@ class CSVBuilder:
 
         path = os.path.join(CONFIG["server"]["temp_directory"], session_id)
         path = os.path.join(path, f"{researcher_id if researcher_id else 'anonymous'}_{datetime.now().strftime('%H%M%S_%Y%m%d')}.csv")
-        sorted_seeds_records = {}
-        keys = []
+        lines = ["seed_id,velocity,error_margin\n"]
         for record in data:
-            key = record._seed_id
-            if key == None:
-                key = "no_id"
-            if not key in sorted_seeds_records:
-                sorted_seeds_records[key] = []
-            
-            sorted_seeds_records[key].append(str(record._velocity))
-
+            lines.append(record.to_csv_line())
         with open(path, "w") as file:
-            for key in sorted_seeds_records:
-                sorted_seeds_records[key].insert(0, key)
-                file.write(f"{','.join(sorted_seeds_records[key])}\n")
+            file.writelines(lines)
+    
+        return path
+
+    def append(file_path: str, data: Record):
+        # Read the current contents of the file
+        try:
+            with open(file_path, "a") as file:
+                ##Check if the file is empty
+                file.write(data.to_csv_line())
+        except FileNotFoundError:
+            with open(file_path, "w") as file:
+                file.write("seed_id,velocity,error_margin\n")
+                file.write(data.to_csv_line())
+
+
         
 
-        return path
+
+

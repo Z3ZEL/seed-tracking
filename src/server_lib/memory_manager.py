@@ -3,6 +3,8 @@ import cv2 as cv
 import os
 import json
 import shutil
+from server_lib.csv_builder import CSVBuilder
+from server_lib.session_record_manager import Record
 
 
 
@@ -67,6 +69,18 @@ class MemoryManager:
 
         return f"{session_id}/{name}"
     
+
+    def log_record(self, session_id : str, researcher_id : str, record : Record):
+        '''
+            Log a record in the session directory
+        '''
+        path = os.path.join(self.dir_path, researcher_id)
+        if not os.path.exists(path):
+            os.makedirs(path)
+        path = os.path.join(path, f"{session_id}.csv")
+
+        CSVBuilder.append(path, record)
+
     
 
     def release_session(self, session_id : str):

@@ -1,5 +1,5 @@
 from uuid import UUID
-import json
+from resource_manager import CONFIG as config
 
 class Record:
     def __init__(self, velocity : float, error_margin : float, plots : list[str], seed_images : list[str], master_seed_number : int, slave_seed_number : int, seed_id : str = None) -> None:
@@ -24,11 +24,18 @@ class Record:
             "slave_seed_number" : self._slave_seed_number,
             "master_seed_numver" : self._master_seed_number
         }
+    
+    def to_csv_line(self) -> str:
+        '''
+            Return the record in csv format
+        '''
+        return f'{self._seed_id if self._seed_id else "no_id"},{self._velocity}, {self._error_margin}\n'
 
 class SessionRecordManager:
-    def __init__(self):
+    def __init__(self, memory_manager) -> None:
         self.session_records : dict[UUID, list[Record]] = {}
         self._linked_researchers : dict[UUID, str]= {}
+        self._memory_manager = memory_manager
 
         
 
@@ -45,7 +52,14 @@ class SessionRecordManager:
     def validate_record(self, session_id : UUID):
         if len(self.session_records[session_id]) == 0:
             return
-        self.session_records[session_id][-1]._validated = True
+        if not self.session_records[session_id][-1]._validated:
+            self.session_records[session_id][-1]._validated = True
+            ## Append record to backup csv only if it associated with a researcher
+            if session_id in self._linked_researchers:
+                self._memory_manager.log_record(str(session_id), self._linked_researchers[session_id], self.session_records[session_id][-1])
+            
+
+
     def pop_reccord(self, session_id: UUID):
         if len(self.session_records[session_id]) == 0 or self.session_records[session_id][-1]._validated:
             return
