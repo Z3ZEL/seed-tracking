@@ -45,11 +45,9 @@ def main():
         clean(config)
         exit(0)
     if(kwargs["shot"] == "single"):
-        import time,os, socket
+        import time,os
         from actions.single_shot import shot, send_shot, fetch_shot
         print("SHOT TIME !")
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        
 
         #Retrieve the current highest number
         current = get_highest_number(config["master_camera"]["temp_directory"])
@@ -62,7 +60,7 @@ def main():
 
 
             # Send cmd to slave
-            send_shot(sock, target_timestamp, config, suffix=current)
+            send_shot(target_timestamp, config, suffix=current)
             
             m_path, s_path = shot("output", target_timestamp,suffix=current)
 
@@ -85,21 +83,19 @@ def main():
 
         exit(0)
     if(kwargs["shot"] == "multiple"):
-        import time, os, socket
+        import time, os
         import numpy as np
         from actions.multiple_shot import shot, fetch_shot, send_shot
-        
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        
+            
         number = int(time.time())
         
         input("Input press enter to start multiple shot")
         start_timestamp = time.time_ns() + 1*10**9
         end_timestamp = start_timestamp + 4*10**9 # last 2 seconds
 
-        send_shot(sock, start_timestamp, end_timestamp, config, suffix=number)
+        send_shot(start_timestamp, end_timestamp, config, suffix=number)
 
-        m_paths, s_paths, roi = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number, sock=sock)
+        m_paths, s_paths, roi = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
         m_paths = sorted(m_paths)
         s_paths = sorted(s_paths)
         if(kwargs['display']):
@@ -172,11 +168,9 @@ def main():
 
             
     if kwargs['run']:
-        import time, os, socket
+        import time, os
         from actions.multiple_shot import shot, fetch_shot, send_shot
         from actions.calculate import calculate_real_world_position, calculate_velocity
-
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         
         number = int(input("Enter an ID number"))
         duration = 4
@@ -184,9 +178,9 @@ def main():
         start_timestamp = time.time_ns() + 1*1e9
         end_timestamp = start_timestamp + (duration * 1e9 )
 
-        send_shot(sock, int(start_timestamp), int(end_timestamp), config, suffix=number)
+        send_shot(int(start_timestamp), int(end_timestamp), config, suffix=number)
 
-        m_paths, s_paths, roi = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number, sock=sock)
+        m_paths, s_paths, roi = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
         
         #If the real range captured is inferior of 50% of the requested duration, then exit
         if roi[1] - roi[0] < 0.2 * duration * 1e9: 
@@ -233,5 +227,5 @@ def main():
 
     import server
 
-    server.app.run(host=config["server"]["host"], port=config["server"]["port"], debug=True)
+    server.app.run(host=config["server"]["host"], port=config["server"]["port"])
     

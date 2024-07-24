@@ -2,7 +2,7 @@ import cv2 as cv
 import os
 import subprocess
 import time
-from resource_manager import CONFIG, is_master
+from resource_manager import CONFIG, is_master, SOCK
 import signal
 from rpi_interaction import turn_light, buzz
 
@@ -67,9 +67,10 @@ def launch(end_timestamp : int):
     return buffer
 
 def release():
-    print("Releasing camera")
+    print("Releasing...")
     # os.kill(PHOTOGRAPHER.pid, signal.SIGTERM)
     os.remove(VIDEO_PATH) if os.path.exists(VIDEO_PATH) else None
+    SOCK.close()
     # os.remove(PTS) if os.path.exists(PTS) else None
 
 

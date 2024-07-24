@@ -7,7 +7,7 @@ import json
 import subprocess
 from camera import PROCESSOR,FOLDER,VIDEO_PATH, launch
 from rpi_interaction import turn_light
-from resource_manager import CONFIG, is_master
+from resource_manager import CONFIG, is_master, SOCK as sock
 
 def trunc_json(json):
     last = json.rfind('}')
@@ -92,7 +92,7 @@ def shot(outputfolder, start_timestamp, prefix="m", suffix=""):
 
 
 
-def send_shot(sock, target_timestamp, config, suffix=""):
+def send_shot(target_timestamp, config, suffix=""):
     message = ("single" + ":" + str(target_timestamp) + ":" + str(suffix)).encode('utf-8')
     sock.sendto(message, (config["slave_camera"]["camera_address"], config["socket_port"]))
 

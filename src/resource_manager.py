@@ -5,10 +5,14 @@ import json
 import numpy as np
 import args
 import re
+import socket
 CONFIG={}
 
 with open("config.json", "r") as file:
     CONFIG = json.load(file)
+
+
+
 
 def extract_digit(x):
     char = ''
@@ -95,7 +99,14 @@ def save_images(dirPath, images, timestamp=False):
 def is_master():
     return args.is_master()
 
+
+
 def delete_paths(paths):
     for path in paths:
         if os.path.exists(path):
             os.remove(path)
+_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+print(CONFIG["socket_port"])
+_sock.bind(("0.0.0.0",CONFIG["socket_port"]))
+_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+SOCK = _sock

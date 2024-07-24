@@ -8,13 +8,10 @@ import uuid
 import cv2 as cv
 import glob
 import os
-import socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
 
 #### Internal import
 import actions
-from actions.multiple_shot import shot
+from actions.multiple_shot import shot, send_shot
 from resource_manager import CONFIG
 import args
 from server_lib.device_exception import DeviceRecordException
@@ -55,8 +52,8 @@ class RecordLauncher(threading.Thread):
 
 
         try:
-            actions.send_shot(sock, start_ts, end_ts, CONFIG, suffix=start_ts)
-            m_paths, s_paths, roi = shot(CONFIG["master_camera"]["temp_directory"], start_ts, end_ts, suffix=start_ts, sock=sock)
+            send_shot(start_ts, end_ts, CONFIG, suffix=start_ts)
+            m_paths, s_paths, roi = shot(CONFIG["master_camera"]["temp_directory"], start_ts, end_ts, suffix=start_ts)
 
         except SystemExit:
             raise DeviceRecordException("An issue occured during recording please try again")

@@ -7,9 +7,8 @@ import re
 import signal
 import numpy as np
 from rpi_interaction import turn_light
-from resource_manager import is_master,extract_timestamp, CONFIG
+from resource_manager import is_master,extract_timestamp, CONFIG, SOCK as sock
 import json
-import socket
 from camera import PROCESSOR, VIDEO_PATH as video_path, FOLDER as folder, launch
 
 def trunc_json(json):
@@ -34,7 +33,7 @@ def fetch_shot(config, number):
     return paths
 
 
-def shot(outputfolder, start_timestamp, end_timestamp, sock:  socket.socket=None, prefix="m", suffix="0"):
+def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
     '''
     Take a shot and save it in the output folder
 
@@ -120,9 +119,9 @@ def shot(outputfolder, start_timestamp, end_timestamp, sock:  socket.socket=None
     print("Fetching slave images ...")
 
     #Waiting for the slave to finish
-    res = sock.recv(1024)
+    res, addr = sock.recvfrom(1024)
     if "done".encode('utf-8') not in res:
-        print("Error : ",res)
+        print("Error : ",res.decode("utf-8"))
         exit(1)
 
 
@@ -139,7 +138,8 @@ def shot(outputfolder, start_timestamp, end_timestamp, sock:  socket.socket=None
         print("Erreur : ",e)
 
     
-
+    if len(s_paths) == 0 or len(m_paths) == 0:
+        raise SystemExit("No image from a camera")
 
 
     m_timestamps = np.array([int(ts) for ts in timestamps])
@@ -175,7 +175,7 @@ def shot(outputfolder, start_timestamp, end_timestamp, sock:  socket.socket=None
 
 
 
-def send_shot(sock, start_timestamp, end_timestamp, config, suffix=""):
+def send_shot(start_timestamp, end_timestamp, config, suffix=""):
     message = ("multiple" + ":" + str(start_timestamp) + ":" + str(end_timestamp) + ":" + str(suffix)).encode('utf-8')
     sock.sendto(message, (config["slave_camera"]["camera_address"], config["socket_port"]))
 
