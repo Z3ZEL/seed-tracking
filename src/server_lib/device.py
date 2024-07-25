@@ -124,6 +124,9 @@ class Device:
 
         return _session_id
 
+
+
+
     @check_session
     def stop_session(self, session_id : UUID):
         '''
@@ -198,7 +201,7 @@ class Device:
         self.change_status(DeviceStatus.READY)
         
 
-        return {"error" : str(self._last_error)}, 400
+        return {"error" : str(self._last_error)}, 200
 
 
 

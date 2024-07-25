@@ -1,9 +1,12 @@
-from flask import Flask, session, abort,request, send_from_directory, send_file
+from flask import Flask, session, abort,request, send_from_directory, send_file, Response
 import os
 from werkzeug.exceptions import BadRequestKeyError
 from server_lib.device import Device, DeviceStatus
 import server_lib.device_exception
+from args import get_args_dict
 from resource_manager import CONFIG
+from uuid import UUID
+import time
 
 true_str = ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh']
 false_str = ['false', '0', 'f', 'n', 'no', 'nope', 'nah', 'not really', 'no way']
@@ -34,17 +37,31 @@ def handle_device_state_not_allowed(error):
 def handle_no_record(error):
     return {"error": "No record found"}, 404
 
+# Disabling cors if dev
+if get_args_dict()["dev"]:
+    from flask_cors import CORS
+    CORS(app, origins="*", allow_headers="*")
 
+    @app.route("/trigger_error")
+    def trigger_error():
+        device.raise_error(server_lib.device_exception.DeviceException("A test error"))
+        return "ok", 200
 
 def get_uuid():
-    return session.get('uuid')
+    return UUID(request.args.get("uuid")) if "uuid" in request.args else session.get("uuid")
 
 
 @app.route('/status')
 def status():
     uuid = get_uuid()
-    print(uuid)
-    return device.status(uuid).name
+    ## Keep the session alive and return the status whenever the status is changing
+    def gen():
+        while True:
+            yield f"data: {device.status(uuid).name}\n\n"
+            ## Sleep for 1 second
+            time.sleep(1)
+    return Response(gen(), mimetype='text/event-stream')
+
 
 
 @app.route('/init')
@@ -62,6 +79,7 @@ def stop():
 @app.route('/start')
 def start():
     uuid = get_uuid()
+    print("Session ID " , uuid)
     delay = request.args.get("delay")
     try:
         delay = int(delay) if delay != None else 2
@@ -137,8 +155,5 @@ def get_image(session_id, filename):
 
     
 
-
-
-    
 
 
