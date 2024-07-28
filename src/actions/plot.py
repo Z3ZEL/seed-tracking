@@ -6,8 +6,15 @@ import numpy as np
 from datetime import datetime, timedelta
 import matplotlib.dates as mdates
 
-    
+
+
 kwargs = args()
+
+def redefine_args(_kwargs):
+    global kwargs
+    kwargs = _kwargs
+    
+
 __plot_id = 0
 
 def init_plot(plot_id : str):
@@ -17,12 +24,14 @@ def init_plot(plot_id : str):
 
 def plot_wrapper(plot_name : str):
     global __plot_id
-    if not kwargs["plot"]:
-        return lambda x: x
     def decorator(func):
         def inner(*args, **ka):
+            global kwargs
+            if not kwargs["plot"]:
+                return
             fig, ax = plt.subplots()
-            func(*args, **ka, fig=fig, ax=ax)
+            print("plotting", fig, ax)
+            func(*args, fig=fig, ax=ax,**ka)
             if kwargs['plot'] and not kwargs['dry_run']:
                 plt.savefig(f"{config['master_camera']['temp_directory']}/{__plot_id}_{plot_name}.png")
     

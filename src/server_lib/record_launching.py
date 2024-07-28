@@ -17,6 +17,7 @@ import args
 from server_lib.device_exception import DeviceRecordException
 from server_lib.session_record_manager import SessionRecordManager, Record
 from server_lib.memory_manager import MemoryManager
+from actions.plot import init_plot, redefine_args
 
 ##headless
 import matplotlib
@@ -37,7 +38,8 @@ class RecordLauncher(threading.Thread):
         self._delay = delay
         self._seed_id = seed_id
         self._kwargs = args.get_args_dict() | {"plot":True}
-
+        redefine_args(self._kwargs)
+        init_plot("plot")
         actions.clean(CONFIG)
 
         

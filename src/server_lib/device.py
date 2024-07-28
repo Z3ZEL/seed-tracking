@@ -154,7 +154,7 @@ class Device:
 
         ## Adding recording and computing here thread based
         
-        record_launcher = RecordLauncher(self, self._records_manager, self._memory_manager, session_id, 4, delay = delay, seed_id = seed_id)
+        record_launcher = RecordLauncher(self, self._records_manager, self._memory_manager, session_id, 6, delay = delay, seed_id = seed_id)
         record_launcher.start()
 
         

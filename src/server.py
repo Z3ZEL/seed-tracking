@@ -38,9 +38,10 @@ def handle_no_record(error):
     return {"error": "No record found"}, 404
 
 # Disabling cors if dev
+from flask_cors import CORS
+CORS(app, origins="*", allow_headers="*")
 if get_args_dict()["dev"]:
-    from flask_cors import CORS
-    CORS(app, origins="*", allow_headers="*")
+
 
     @app.route("/trigger_error")
     def trigger_error():

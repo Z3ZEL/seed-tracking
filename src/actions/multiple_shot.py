@@ -49,6 +49,8 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
     list: Slave image paths
     roi : Range of interest (min, max)
     '''
+    #flush socket
+    
     outputfolder = folder
     duration = (end_timestamp-start_timestamp) * 10**-9
     print("Recording for", duration, " seconds")
@@ -88,11 +90,17 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
         print("\033[H\033[J", end="")
         print(f"{round((len(imgs)/len(img_paths)) * 100)}% completed")
         #clear console
-        
+    
+    if len(imgs) == 0:
+        ##Flush sock
+        sock.recvfrom(1024)
+        raise SystemExit("There was an error with the camera, please try again")
 
     paths = []
     if abs(len(timestamps) - len(img_paths)) >= 5:
         print("Differents timestamp code founded than picture numbers ",len(timestamps), " ",len(img_paths))
+        ##Flush sock
+        sock.recvfrom(1024)
         exit(1)
 
     while len(timestamps) != len(img_paths):
