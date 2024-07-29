@@ -22,7 +22,7 @@ class Record:
             "seed_images" : self._seed_images,
             "seed_id" : self._seed_id,
             "slave_seed_number" : self._slave_seed_number,
-            "master_seed_numver" : self._master_seed_number,
+            "master_seed_number" : self._master_seed_number,
             "xz_gap" : self._xz_gap
         }
     

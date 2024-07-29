@@ -3,11 +3,12 @@ from resource_manager import CONFIG
 import os
 from datetime import datetime
 class CSVBuilder:
+    HEADER = "seed_id,velocity,error_margin,x_gap,z_gap\n"
     def build(data : list[Record], session_id : str, researcher_id : str = None):
 
         path = os.path.join(CONFIG["server"]["temp_directory"], session_id)
         path = os.path.join(path, f"{researcher_id if researcher_id else 'anonymous'}_{datetime.now().strftime('%H%M%S_%Y%m%d')}.csv")
-        lines = ["seed_id,velocity,error_margin\n"]
+        lines = [CSVBuilder.HEADER]
         for record in data:
             lines.append(record.to_csv_line())
         with open(path, "w") as file:
@@ -23,7 +24,7 @@ class CSVBuilder:
                 file.write(data.to_csv_line())
         except FileNotFoundError:
             with open(file_path, "w") as file:
-                file.write("seed_id,velocity,error_margin\n")
+                file.write(CSVBuilder.HEADER)
                 file.write(data.to_csv_line())
 
 
