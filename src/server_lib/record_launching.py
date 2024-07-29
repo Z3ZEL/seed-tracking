@@ -56,7 +56,6 @@ class RecordLauncher(threading.Thread):
         try:
             send_shot(start_ts, end_ts, CONFIG, suffix=start_ts)
             m_paths, s_paths, roi = shot(CONFIG["master_camera"]["temp_directory"], start_ts, end_ts, suffix=start_ts)
-
         except SystemExit:
             raise DeviceRecordException("An issue occured during recording please try again")
 
@@ -79,7 +78,10 @@ class RecordLauncher(threading.Thread):
             m_computed, s_computed = actions.calculate_real_world_position(self._m_paths, self._s_paths, CONFIG, **self._kwargs)
         except SystemExit:
             raise DeviceRecordException("There was an error during computing the seed world positions")
-
+        try:
+            xz_gap = actions.calculate_max_xz_gap(m_computed, s_computed)
+        except SystemExit:
+            raise DeviceRecordException("There was an error during gap computing")
         try:
             velocity, error = actions.calculate_velocity(m_computed, s_computed, CONFIG,  **self._kwargs)
         except SystemExit:
@@ -99,7 +101,7 @@ class RecordLauncher(threading.Thread):
 
         ##...
 
-        self._record_manager.add_record(self._session_id, Record(velocity, error, plots, results, len(m_computed), len(s_computed),seed_id = self._seed_id))
+        self._record_manager.add_record(self._session_id, Record(velocity, error, plots, results, len(m_computed), len(s_computed), xz_gap,seed_id = self._seed_id))
 
         self._device.change_status(DeviceStatus.READY)
 

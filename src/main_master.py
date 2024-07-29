@@ -145,7 +145,7 @@ def main():
         exit(0)
     
     if kwargs['calculate']:
-        from actions.calculate import calculate_real_world_position, calculate_velocity
+        from actions.calculate import calculate_real_world_position, calculate_velocity, calculate_max_xz_gap
         import glob
         import numpy as np
        
@@ -156,7 +156,9 @@ def main():
         init_plot(id)
 
         m_computed, s_computed = calculate_real_world_position(m_paths, s_paths, config, **kwargs)
-
+        x_gap, z_gap = calculate_max_xz_gap(m_computed, s_computed)
+        print(f"Max distance in X : {round(x_gap,2)} cm")
+        print(f"Max distance in Z : {round(z_gap,2)} cm")
         velocity, error = calculate_velocity(m_computed, s_computed, config, **kwargs)
 
 
@@ -206,6 +208,10 @@ def main():
             if kwargs["dry_run"]:
                 release_imgs(m_paths, s_paths)
             exit(1)
+
+        x_gap, z_gap = calculate_max_xz_gap(m_computed, s_computed)
+        print(f"Max distance in X : {round(x_gap,2)} cm")
+        print(f"Max distance in Z : {round(z_gap,2)} cm")
 
         try:
             velocity, error = calculate_velocity(m_computed, s_computed, config, **kwargs)

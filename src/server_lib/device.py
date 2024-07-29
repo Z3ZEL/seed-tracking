@@ -46,10 +46,6 @@ class Device:
     def status(self, session_id: UUID = None) -> DeviceStatus:
        return self._status
     
-    def change_current_session(self, new_current_session : UUID) :
-        self._sessions.remvoe(new_current_session)
-        self._sessions.insert(0, new_current_session)
-
     def change_status(self, status: DeviceStatus):
         if status == DeviceStatus.READY and len(self._sessions) <= 0:
             self._status = DeviceStatus.WAITING

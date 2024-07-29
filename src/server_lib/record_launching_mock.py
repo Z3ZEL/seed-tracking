@@ -53,6 +53,8 @@ class RecordLauncher(threading.Thread):
         master_image_number = random.randrange(0,5)
         slave_image_number = random.randrange(0,5)
 
+        xz_gap = (random.randrange(0,5), random.randrange(0,5))
+
         if master_image_number == 0 and slave_image_number == 0:
             raise DeviceRecordException("No image found")
             
@@ -85,7 +87,7 @@ class RecordLauncher(threading.Thread):
 
 
 
-        record = Record(random.random() * 3, random.random() * 1, plots, seeds, master_image_number, slave_image_number, seed_id= self._seed_id)
+        record = Record(random.random() * 3, random.random() * 1, plots, seeds, master_image_number, slave_image_number,xz_gap, seed_id= self._seed_id)
         self._record_manager.add_record(self._session_id, record)
         sleep(2)
         self._device.change_status(DeviceStatus.READY)

@@ -246,3 +246,38 @@ def calculate_velocity(m_computed, s_computed, config, **kwargs):
     except SystemExit:
         raise SystemExit("There was an error during the velocity computing")
     return velocity, error
+
+
+def calculate_max_xz_gap(m_computed, s_computed):
+    '''
+    Calculate the gap between the min and max on both x and z axis.
+
+    Args:
+        m_computed (list): List of computed master positions.
+        s_computed (list): List of computed slave positions.
+
+    Returns:
+       (x_distance, z_distance) (tuple): The gap between the min and max on both x and z axis.
+    '''
+    (min_z, max_z) = m_computed[0][2], m_computed[0][2]
+    (min_x, max_x) = m_computed[0][0], m_computed[0][0]
+
+    for m_pos in m_computed:
+        min_z = min(min_z, m_pos[2])
+        max_z = max(max_z, m_pos[2])
+
+        min_x = min(min_x, m_pos[0])
+        max_x = max(max_x, m_pos[0])
+                    
+    for s_pos in s_computed:
+        min_z = min(min_z, s_pos[2])
+        max_z = max(max_z, s_pos[2])
+
+        min_x = min(min_x, s_pos[0])
+        max_x = max(max_x, s_pos[0])
+
+    return (max_x - min_x, max_z - min_z)
+
+
+
+    
