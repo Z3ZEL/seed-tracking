@@ -1,4 +1,6 @@
 from typing import TYPE_CHECKING
+
+from server_lib.record import Record
 if TYPE_CHECKING:
     from server_lib.device import Device
 
@@ -15,7 +17,7 @@ from actions.multiple_shot import shot, send_shot
 from resource_manager import CONFIG
 import args
 from server_lib.device_exception import DeviceRecordException
-from server_lib.session_record_manager import SessionRecordManager, Record
+from server_lib.session_record_manager import SessionRecordManager
 from server_lib.memory_manager import MemoryManager
 from actions.plot import init_plot, redefine_args
 

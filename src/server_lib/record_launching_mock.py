@@ -1,8 +1,9 @@
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from server_lib.device import Device
+from server_lib.record import Record
 from server_lib.device_exception import DeviceRecordException
-from server_lib.session_record_manager import SessionRecordManager, Record
+from server_lib.session_record_manager import SessionRecordManager
 from server_lib.memory_manager import MemoryManager
 from resource_manager import CONFIG 
 import args
@@ -40,13 +41,15 @@ class RecordLauncher(threading.Thread):
 
     def _shooting_picture(self):
         from server_lib.device import DeviceStatus
-
+        print("shooting picture")
         self._device.change_status(DeviceStatus.RECORDING)
         sleep(2)
         self._calculate()
 
     def _calculate(self):
         from server_lib.device import DeviceStatus
+        print("calculating")
+        
 
         self._device.change_status(DeviceStatus.COMPUTING)
 
@@ -67,6 +70,7 @@ class RecordLauncher(threading.Thread):
             img = np.zeros((512,512,3), np.uint8)
             # write seed{i} on the image
             cv.putText(img, f"seed{i}", (10,500), cv.FONT_HERSHEY_SIMPLEX, 4, (255,255,255), 2, cv.LINE_AA)
+            print("saving seed")
             # save the image
             path = self._memory_manager.save_img(self._session_id,img, f"seed{str(uuid.uuid4())}.jpg")
             # append the seed to the list
@@ -79,6 +83,7 @@ class RecordLauncher(threading.Thread):
             # write plot{i} on the image
             cv.putText(img, f"plot{i}", (10,500), cv.FONT_HERSHEY_SIMPLEX, 4, (255,255,255), 2, cv.LINE_AA)
             # save the image
+            print("saving plot")
             path = self._memory_manager.save_img(self._session_id,img, f"plot{str(uuid.uuid4())}.jpg")
             # append the plot to the list
             plots.append(path)
@@ -89,6 +94,7 @@ class RecordLauncher(threading.Thread):
 
         record = Record(random.random() * 3, random.random() * 1, plots, seeds, master_image_number, slave_image_number,xz_gap, seed_id= self._seed_id)
         self._record_manager.add_record(self._session_id, record)
+        print("record added")
         sleep(2)
         self._device.change_status(DeviceStatus.READY)
 
@@ -98,7 +104,6 @@ class RecordLauncher(threading.Thread):
         from server_lib.device import DeviceStatus
         try:        
             self._shooting_picture()
-            # self._calculate()
         except DeviceRecordException as e:
             self._device.raise_error(e)
             self._device.change_status(DeviceStatus.ERROR)

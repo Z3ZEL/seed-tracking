@@ -4,7 +4,7 @@ import os
 import json
 import shutil
 from server_lib.csv_builder import CSVBuilder
-from server_lib.session_record_manager import Record
+from server_lib.record import Record
 
 
 

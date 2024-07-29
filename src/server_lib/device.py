@@ -3,7 +3,8 @@ from typing import List
 from uuid import uuid4, UUID
 from time import sleep
 from server_lib import device_exception
-from server_lib.session_record_manager import Record, SessionRecordManager
+from server_lib.record import Record
+from server_lib.session_record_manager import SessionRecordManager
 from server_lib.memory_manager import MemoryManager
 from server_lib.csv_builder import CSVBuilder
 

@@ -1,4 +1,4 @@
-from server_lib.session_record_manager import Record
+from server_lib.record import Record
 from resource_manager import CONFIG
 import os
 from datetime import datetime
