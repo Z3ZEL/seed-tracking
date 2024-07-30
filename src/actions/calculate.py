@@ -9,13 +9,18 @@ from interfaces.image_computing.image_computer import ImageComputer
 from interfaces.numerical_computing.data_cleaner import DataCleaner
 from importlib import import_module
 from actions.plot import plot_frame_with_timestamp, plot_seed_positions, plot_mean_x
-import cv2,os
+import cv2,os,time
 import numpy as np
 import psutil
 
 def print_extra(*args):
     out = " ".join([str(arg) for arg in args])
     print(f"{out} - {psutil.cpu_percent()}%")
+
+def cool_down():
+    while psutil.cpu_percent() > 90:
+        print("Cooling down")
+        time.sleep(1)
 
 
 def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
@@ -72,18 +77,23 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     m_imgs = [m_preprocessor.process(im) for im in m_imgs]
     s_imgs = [s_preprocessor.process(im) for im in s_imgs]
 
+    cool_down()
+
     
     #Apply the optimizers
     print_extra("Optimizing master...")
     OptimizerApplier([
         SmoothOptimizer(image_set = m_imgs, iteration=2, kernel_size=5)
     ]).apply(m_background_substractor)
+
+    cool_down()
+
     print_extra("Optimizing slave...")
     OptimizerApplier([
         SmoothOptimizer(image_set = s_imgs, iteration=2, kernel_size=5)
     ]).apply(s_background_substractor)
 
-
+    cool_down()
     print_extra("Processing Master images...")
     m_saveIms = []
     m_savePos = []
@@ -106,6 +116,8 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
             cv2.circle(out, pos, 5, (0, 0, 255), -1)
             out = cv2.hconcat([im, out])
             m_saveIms.append(out)
+
+    cool_down()
 
     print_extra(f"Found {len(m_saveIms)} seeds for master")
 
@@ -130,7 +142,6 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     if(len(m_saveIms) == 0 or len(s_saveIms) == 0):
         print("There must be at least one seed detected on both camera")
         exit(1)
-
     
     ## Cleaning dataset
 
