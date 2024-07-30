@@ -31,6 +31,7 @@ class LoggerThread(Thread):
                 self._memory_manager.log_record_output(self._session_id, self._stdout.getvalue())
             except DeviceException as e:
                 sys.stdout = self._original_stdout
+                self._memory_manager.log_record_output(self._session_id, self._stdout.getvalue(), exception=e)
                 self._device.raise_error(e)
         return wrapper
     

@@ -8,9 +8,7 @@ class DeviceError(enum.Enum):
 
     def __str__(self):
         return str(self.name)
-    
-    def __int__(self):
-        return self.value
+
 
 class DeviceException(Exception):
     def __init__(self, message):

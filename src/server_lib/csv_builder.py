@@ -18,14 +18,15 @@ class CSVBuilder:
 
     def append(file_path: str, data: Record):
         # Read the current contents of the file
-        try:
-            with open(file_path, "a") as file:
-                ##Check if the file is empty
-                file.write(data.to_csv_line())
-        except FileNotFoundError:
-            with open(file_path, "w") as file:
+
+        with open(file_path, "a+") as file:
+            ##Check if the file is empty
+            
+            file.seek(0, 2)  # Move the cursor to the end of the file
+            if file.tell() == 0:  # If the cursor is at the beginning, the file is empty
                 file.write(CSVBuilder.HEADER)
-                file.write(data.to_csv_line())
+            file.write(data.to_csv_line())
+    
 
 
         

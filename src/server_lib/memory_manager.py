@@ -98,7 +98,7 @@ class MemoryManager:
             file.write("###### {time} ######\n".format(time = time.strftime("%H:%M:%S")))
             file.write(logs)
             if exception:
-                file.write(f"[ERROR] [{str(DeviceError(exception.error_code))}] {str(exception)}\n")
+                file.write(f"[ERROR] [{str(exception.error_code)}] {str(exception)}\n")
 
 
 
