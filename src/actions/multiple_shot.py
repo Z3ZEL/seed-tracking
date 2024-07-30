@@ -76,7 +76,7 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
 
 
     ##Convert to img
-    converter = subprocess.Popen(convert_cmd.split(" "))
+    converter = subprocess.Popen(convert_cmd.split(" "), stdout=subprocess.DEVNULL)
     converter.wait()
     ##Read metadata and processing
     imgs = []
