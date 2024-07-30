@@ -11,6 +11,11 @@ from importlib import import_module
 from actions.plot import plot_frame_with_timestamp, plot_seed_positions, plot_mean_x
 import cv2,os
 import numpy as np
+import psutil
+
+def print_extra(*args):
+    out = " ".join([str(arg) for arg in args])
+    print(f"{out} - {psutil.cpu_percent()}%")
 
 
 def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
@@ -50,11 +55,11 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     m_img_datas = list(map(lambda name : (name, extract_timestamp(name)), m_img_datas))
     s_img_datas = list(map(lambda name : (name, extract_timestamp(name)), s_img_datas))
 
-    print(f"Found {len(m_imgs)} for master and {len(s_imgs)} for slave")
+    print_extra(f"Found {len(m_imgs)} for master and {len(s_imgs)} for slave")
 
 
     id = extract_id(m_img_datas[0][0])
-    print("Loading camera configuration")
+    print_extra("Loading camera configuration")
 
     mtx1, dist1, mtx2, dist2, R, T = load_camera_configuration()
     
@@ -69,23 +74,23 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
 
     
     #Apply the optimizers
-    print("Optimizing master...")
+    print_extra("Optimizing master...")
     OptimizerApplier([
         SmoothOptimizer(image_set = m_imgs, iteration=2, kernel_size=5)
     ]).apply(m_background_substractor)
-    print("Optimizing slave...")
+    print_extra("Optimizing slave...")
     OptimizerApplier([
         SmoothOptimizer(image_set = s_imgs, iteration=2, kernel_size=5)
     ]).apply(s_background_substractor)
 
 
-    print("Processing Master images...")
+    print_extra("Processing Master images...")
     m_saveIms = []
     m_savePos = []
 
     for im, data in zip(m_imgs, m_img_datas):
         if verbose:
-            print("Processing ", data[0])
+            print_extra("Processing ", data[0])
         ## Remove the background
         
         out = m_background_substractor.process(im)
@@ -102,9 +107,9 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
             out = cv2.hconcat([im, out])
             m_saveIms.append(out)
 
-    print(f"Found {len(m_saveIms)} seeds for master")
+    print_extra(f"Found {len(m_saveIms)} seeds for master")
 
-    print("Processing Slave images...")
+    print_extra("Processing Slave images...")
     s_savePos = []
     s_saveIms = []
 
@@ -120,7 +125,7 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
             out = cv2.hconcat([im, out])
             s_saveIms.append(out)
 
-    print(f"Found {len(s_saveIms)} seeds for slave")
+    print_extra(f"Found {len(s_saveIms)} seeds for slave")
     
     if(len(m_saveIms) == 0 or len(s_saveIms) == 0):
         print("There must be at least one seed detected on both camera")
@@ -129,7 +134,7 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     
     ## Cleaning dataset
 
-    print("Cleaning dataset")
+    print_extra("Cleaning dataset")
     data_cleaner_algorithm = import_module("computations."+config['seed_computing']['seed_position_data_cleaner_algorithm'])
     algoritm_param = config['seed_computing']['seed_position_data_cleaner_params'] if 'seed_position_data_cleaner_params' in config['seed_computing'] else {}
     data_cleaner : DataCleaner = data_cleaner_algorithm.Computer(**algoritm_param)
@@ -163,7 +168,7 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     m_points = [((m_x_mean,pos[1]),(s_x_mean, pos[1]), ts) for pos, ts in m_savePos]
     s_points = [((m_x_mean,pos[1]),(s_x_mean, pos[1]), ts) for pos, ts in s_savePos]
 
-    print("Compute master points")
+    print_extra("Compute master points")
 
     m_computed = []
 
@@ -173,7 +178,7 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
         m_computed.append((x,y,z,ts))
 
 
-    print("Compute slave points")
+    print_extra("Compute slave points")
 
     s_computed = []
 

@@ -24,7 +24,8 @@ def trunc_json(json):
 
 
 def fetch_shot(config, number):
-    proc = os.system(f'scp {config["slave_camera"]["camera_host"]}@{config["slave_camera"]["camera_address"]}:{config["slave_camera"]["temp_directory"]}/s_img_* {config["master_camera"]["temp_directory"]}')
+    proc = subprocess.Popen(f'scp {config["slave_camera"]["camera_host"]}@{config["slave_camera"]["camera_address"]}:{config["slave_camera"]["temp_directory"]}/s_img_* {config["master_camera"]["temp_directory"]}'.split(" "), stdout=subprocess.DEVNULL)
+    proc.wait()
     file = os.path.join(config["master_camera"]["temp_directory"],f"s_img_*_{number}.jpg")
     paths = glob.glob(file)
     if len(paths) < 1:
@@ -87,9 +88,8 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
         # img = cv.fastNlMeansDenoising(img, 5, 3)
         img = PROCESSOR.process(img)
         imgs.append(img)
-        print("\033[H\033[J", end="")
-        print(f"{round((len(imgs)/len(img_paths)) * 100)}% completed")
-        #clear console
+        
+    print("Images processed")
     
     if len(imgs) == 0:
         ##Flush sock
