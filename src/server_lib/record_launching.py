@@ -19,23 +19,21 @@ import args
 from server_lib.device_exception import DeviceRecordException
 from server_lib.session_record_manager import SessionRecordManager
 from server_lib.memory_manager import MemoryManager
+from server_lib.logger_thread import LoggerThread
 from actions.plot import init_plot, redefine_args
 
 ##headless
 import matplotlib
 matplotlib.use('Agg')
 
-class RecordLauncher(threading.Thread):
+class RecordLauncher(LoggerThread):
     '''
         The linking object between the real device and the backend server
     '''
 
     def __init__(self, device: 'Device', record_manager: SessionRecordManager, memory_manager : MemoryManager, session_id: str, duration : int, delay : int = 2, seed_id : str = None) -> None:
-        super().__init__()
-        self._device = device
+        super().__init__(session_id, memory_manager, device)
         self._record_manager = record_manager
-        self._session_id = session_id
-        self._memory_manager = memory_manager
         self._duration = duration
         self._delay = delay
         self._seed_id = seed_id
@@ -107,15 +105,12 @@ class RecordLauncher(threading.Thread):
 
         self._device.change_status(DeviceStatus.READY)
 
-    
-    def run(self):
-        from server_lib.device import DeviceStatus
-        try:        
-            self._shooting_picture()
-            # self._calculate()
-        except DeviceRecordException as e:
-            self._device.raise_error(e)
-            self._device.change_status(DeviceStatus.ERROR)
+    @LoggerThread.logger
+    def run(self):  
+        self._shooting_picture()
+        
+        
+            
 
         
 
