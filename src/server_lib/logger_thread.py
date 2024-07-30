@@ -5,8 +5,10 @@ import io,sys
 from threading import Thread
 from server_lib.device_exception import DeviceException
 from server_lib.memory_manager import MemoryManager
-
+from args import get_args_dict
 from uuid import UUID   
+
+config = get_args_dict()
 
 class LoggerThread(Thread):
     '''
@@ -20,18 +22,20 @@ class LoggerThread(Thread):
 
         self._original_stdout = sys.stdout
         
-        self._stdout = io.StringIO()
+        self._stdout = io.StringIO() if not config["dev"] else sys.stdout
 
     def logger(func):
         def wrapper(self : LoggerThread, *args, **kwargs):
-            sys.stdout = self._stdout
             try:
+                sys.stdout = self._stdout
                 func(self, *args, **kwargs)
                 sys.stdout = self._original_stdout
-                self._memory_manager.log_record_output(self._session_id, self._stdout.getvalue())
+                if not config["dev"]:
+                    self._memory_manager.log_record_output(self._session_id, self._stdout.getvalue())
             except DeviceException as e:
                 sys.stdout = self._original_stdout
-                self._memory_manager.log_record_output(self._session_id, self._stdout.getvalue(), exception=e)
+                if not config["dev"]:
+                    self._memory_manager.log_record_output(self._session_id, self._stdout.getvalue(), exception=e)
                 self._device.raise_error(e)
         return wrapper
     
