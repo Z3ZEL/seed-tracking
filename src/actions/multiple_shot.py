@@ -70,9 +70,17 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
     
     print("Starting shot ",time.time_ns())
     timestamps = launch(end_timestamp)
+
     
-    ## Wait a bit
-    # time.sleep(1)
+    ## Check if there is enough frames
+    max_ts = max(timestamps)
+    min_ts = min(timestamps)
+
+    if max_ts - min_ts < duration * 1e9 * 0.2:
+        ##Flush sock
+        sock.recvfrom(1024)
+        raise SystemExit("Not enough frames")
+    
 
 
     ##Convert to img
