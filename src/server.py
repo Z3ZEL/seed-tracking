@@ -1,5 +1,5 @@
 from flask import Flask, session, abort,request, send_from_directory, send_file, Response
-import os
+import os, time
 from werkzeug.exceptions import BadRequestKeyError
 from server_lib.device import Device, DeviceStatus
 import server_lib.device_exception
@@ -21,20 +21,27 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 
 ## Error handling
+def logError(error):
+    app.logger.error(f"{time.strftime('%H:%M:%S')} - {str(error)}")
+
 @app.errorhandler(server_lib.device_exception.DeviceNoSessionException)
 def handle_no_session(error):
+    logError(error)
     return {"error": "No session found"}, 404
 
 @app.errorhandler(server_lib.device_exception.DeviceBusyException)
 def handle_device_busy(error):
+    logError(error)
     return {"error": "Device is busy, please try again later"}, 403
 
 @app.errorhandler(server_lib.device_exception.DeviceStateNotAllowed)
 def handle_device_state_not_allowed(error): 
+    logError(error)
     return {"error": "Device is not in right state"}, 405
 
 @app.errorhandler(server_lib.device_exception.NoRecordFound)
 def handle_no_record(error):
+    logError(error)
     return {"error": "No record found"}, 404
 
 # Disabling cors if dev

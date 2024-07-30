@@ -1,8 +1,9 @@
 import numpy as np
 import cv2 as cv
-import os
+import os, time
 import json
 import shutil
+from server_lib.device_exception import DeviceException, DeviceError
 from server_lib.csv_builder import CSVBuilder
 from server_lib.record import Record
 
@@ -21,6 +22,11 @@ class MemoryManager:
 
         #Init researcher data
         self.load_researchers()
+
+        #Init log dir
+        log_dir = os.path.join(dir_path, "logs")
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
 
         #Clear the temp directory
         self.clean_temp_dir()
@@ -81,7 +87,24 @@ class MemoryManager:
 
         CSVBuilder.append(path, record)
 
-    
+    def log_record_output(self, session_id : str, logs : str, exception : DeviceException = None):
+        '''
+            Log the output of the record
+        '''
+        path = os.path.join(self.dir_path, 'logs')
+        path = os.path.join(path, f'{str(session_id)}_{time.strftime("%Y-%m-%d")}.txt')
+
+        with open(path, "a+") as file:
+            file.write("###### {time} ######\n".format(time = time.strftime("%H:%M:%S")))
+            file.write(logs)
+            if exception:
+                file.write(f"[ERROR] [{str(DeviceError(exception.error_code))}] {str(exception)}\n")
+
+
+
+
+        
+
 
     def release_session(self, session_id : str):
         '''

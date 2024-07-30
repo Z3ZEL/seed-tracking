@@ -1,3 +1,17 @@
+import enum
+class DeviceError(enum.Enum):
+    DEVICE_BUSY = 2
+    DEVICE_NO_SESSION = 5
+    DEVICE_STATE_NOT_ALLOWED = 3
+    NO_RECORD_FOUND = 4
+    DEVICE_INTERNAL = -1
+
+    def __str__(self):
+        return str(self.name)
+    
+    def __int__(self):
+        return self.value
+
 class DeviceException(Exception):
     def __init__(self, message):
         super(DeviceException, self).__init__(message)

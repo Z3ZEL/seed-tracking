@@ -5,10 +5,10 @@ from server_lib.record import Record
 from server_lib.device_exception import DeviceRecordException
 from server_lib.session_record_manager import SessionRecordManager
 from server_lib.memory_manager import MemoryManager
+from server_lib.logger_thread import LoggerThread
 from resource_manager import CONFIG 
 import args
 import uuid
-import threading
 from time import sleep
 import random
 import cv2 as cv
@@ -19,17 +19,14 @@ def clean(config):
     for filename in os.listdir(folder):
         if filename.endswith('.jpg') or filename.endswith('.png'):
             os.remove(os.path.join(folder, filename))
-class RecordLauncher(threading.Thread):
+class RecordLauncher(LoggerThread):
     '''
         The linking object between the real device and the backend server, the mock one, used to launch the endpoint for development purposes
     '''
 
     def __init__(self, device: 'Device', record_manager: SessionRecordManager, memory_manager : MemoryManager, session_id: str, duration : int, delay : int = 2, seed_id : str = None) -> None:
-        super().__init__()
-        self._device = device
+        super().__init__(session_id, memory_manager, device)
         self._record_manager = record_manager
-        self._session_id = session_id
-        self._memory_manager = memory_manager
         self._duration = duration
         self._delay = delay
         self._seed_id = seed_id
@@ -99,14 +96,9 @@ class RecordLauncher(threading.Thread):
         self._device.change_status(DeviceStatus.READY)
 
     
-    
+    @LoggerThread.logger
     def run(self):
-        from server_lib.device import DeviceStatus
-        try:        
-            self._shooting_picture()
-        except DeviceRecordException as e:
-            self._device.raise_error(e)
-            self._device.change_status(DeviceStatus.ERROR)
+        self._shooting_picture()
 
 
         
