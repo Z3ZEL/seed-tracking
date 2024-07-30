@@ -1,7 +1,7 @@
 import cv2 as cv
 import os
 import subprocess
-import time
+import time, psutil
 from resource_manager import CONFIG, is_master, SOCK
 import signal
 from rpi_interaction import turn_light, buzz
@@ -43,7 +43,8 @@ def launch(end_timestamp : int):
     # duration_mili = round(duration * 1e-6, 0)
     
     photo = subprocess.Popen(make_shot_cmd(0).split(" "),stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
+    p = psutil.Process(photo.pid)
+    p.nice(-20)
     buffer = []
 
     hasStarted = False
@@ -61,6 +62,7 @@ def launch(end_timestamp : int):
         os.kill(photo.pid, signal.SIGUSR1)
     print("Finished")
     os.kill(photo.pid, signal.SIGTERM)
+    photo.wait()
     
     buzz(0.5)
     turn_light(False)
