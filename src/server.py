@@ -94,7 +94,7 @@ def start():
     except ValueError:
         delay = 2
     seed_id = request.args.get("seed_id")
-    device.start_record(uuid, 5, delay = delay, seed_id = seed_id)
+    device.start_record(uuid, 6, delay = delay, seed_id = seed_id)
     return device.status(uuid).name
 
 

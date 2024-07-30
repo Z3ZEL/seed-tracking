@@ -53,6 +53,23 @@ class Device:
         else:
             self._status = status
 
+    
+    def set_current_session(self, session_id: UUID):
+        '''
+            Set the current session to the session_id
+            
+            Prerequisite: session_id must be in the sessions list
+        '''
+
+        if session_id not in self._sessions:
+            raise device_exception.DeviceNoSessionException()
+        
+        self._sessions.remove(session_id)
+        self._sessions.insert(0, session_id)
+
+
+
+
     def remove_session(self, session_id: UUID):
         self._sessions.remove(session_id)
         if len(self._sessions) == 0:
@@ -149,9 +166,12 @@ class Device:
         ## Auto valid last record
         self._records_manager.validate_record(session_id)
 
+        ## Put session_id as the current session
+        self.set_current_session(session_id)
+
+
         ## Adding recording and computing here thread based
-        
-        record_launcher = RecordLauncher(self, self._records_manager, self._memory_manager, session_id, 6, delay = delay, seed_id = seed_id)
+        record_launcher = RecordLauncher(self, self._records_manager, self._memory_manager, session_id, duration, delay = delay, seed_id = seed_id)
         record_launcher.start()
 
         
@@ -195,6 +215,10 @@ class Device:
     @check_current_session
     @check_status(DeviceStatus.ERROR)
     def get_error_and_release(self, session_id: UUID) -> device_exception.DeviceException:
+        '''
+            Get the last error and release the device
+            Error can be read only by the current session
+        '''
         self.change_status(DeviceStatus.READY)
         
 
