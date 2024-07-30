@@ -75,8 +75,8 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     s_preprocessor = Processor([UndistortLayer(mtx2, dist2)])
 
     m_imgs = [m_preprocessor.process(im) for im in m_imgs]
+    cool_down()
     s_imgs = [s_preprocessor.process(im) for im in s_imgs]
-
     cool_down()
 
     
