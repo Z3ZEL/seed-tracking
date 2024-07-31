@@ -72,6 +72,12 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
     timestamps = launch(end_timestamp)
 
     
+    if len(timestamps) == 0:
+        ##Flush sock
+        sock.recvfrom(1024)
+        raise SystemExit("Not enough frames")
+    
+    
     ## Check if there is enough frames
     max_ts = max(timestamps)
     min_ts = min(timestamps)
