@@ -1,4 +1,4 @@
-from resource_manager import is_master
+from args import is_master
 
 def build_server():
     from server import app

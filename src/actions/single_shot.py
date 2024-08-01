@@ -2,12 +2,12 @@ import os
 import time
 import glob
 import cv2 as cv
-import signal
-import json
 import subprocess
 from camera import PROCESSOR,FOLDER,VIDEO_PATH, launch
 from rpi_interaction import turn_light
-from resource_manager import CONFIG, is_master, SOCK as sock
+from resource_manager import CONFIG, SOCK as sock
+from args import is_master
+
 
 def trunc_json(json):
     last = json.rfind('}')

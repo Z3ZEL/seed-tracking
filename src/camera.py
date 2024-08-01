@@ -2,7 +2,9 @@ import cv2 as cv
 import os
 import subprocess
 import time, psutil
-from resource_manager import CONFIG, is_master, SOCK
+from resource_manager import CONFIG, SOCK
+from args import is_master
+
 import signal
 from rpi_interaction import turn_light, buzz
 
