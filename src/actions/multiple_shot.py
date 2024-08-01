@@ -7,7 +7,8 @@ import re
 import signal
 import numpy as np
 from rpi_interaction import turn_light
-from resource_manager import is_master,extract_timestamp, CONFIG, SOCK as sock
+from resource_manager import extract_timestamp, CONFIG, SOCK as sock
+from args import is_master
 import json
 from camera import PROCESSOR, VIDEO_PATH as video_path, FOLDER as folder, launch
 
