@@ -8,7 +8,11 @@ import re
 import socket
 CONFIG={}
 
-with open("config.json", "r") as file:
+src_dir = os.path.dirname(__file__)
+#go back
+src_dir = os.path.dirname(src_dir)
+config_path = os.path.join(src_dir, "config.json")
+with open(config_path, "r") as file:
     CONFIG = json.load(file)
 
 

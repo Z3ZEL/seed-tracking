@@ -93,6 +93,7 @@ class RecordLauncher(LoggerThread):
         self._record_manager.add_record(self._session_id, record)
         print("record added")
         sleep(2)
+        print("Finished")
         self._device.change_status(DeviceStatus.READY)
 
     

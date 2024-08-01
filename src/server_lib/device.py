@@ -35,6 +35,7 @@ class Device:
         self._memory_manager = MemoryManager(CONFIG["server"]["directory"], CONFIG["server"]["temp_directory"])
         self._records_manager = SessionRecordManager(self._memory_manager)
         self._last_error : device_exception.DeviceException = None
+        self._current_job : RecordLauncher = None
 
     @property
     def memory_manager(self):
@@ -109,11 +110,11 @@ class Device:
 
 
 
-    def check_status(status: DeviceStatus):
+    def check_status(*status : list[DeviceStatus]):
         def decorator(func):
             def inner(self, *args, **kwargs):
-                if self._status != status:
-                    raise device_exception.DeviceStateNotAllowed()
+                if self._status not in status:
+                    raise device_exception.DeviceBusyException()
                 return func(self, *args, **kwargs)
             return inner
         return decorator
@@ -153,6 +154,18 @@ class Device:
         self._records_manager.stop_session(session_id)
         self._memory_manager.release_session(session_id)
 
+    @check_session
+    @check_current_session
+    @check_status(DeviceStatus.COMPUTING, DeviceStatus.RECORDING)
+    def stop_job(self, session_id: UUID):
+        '''
+            Stop the current job
+        '''
+        self._current_job.join(timeout=0.001)
+        print(f"[DEVICE] Job stopped")
+        self._current_job = None
+        self.change_status(DeviceStatus.READY)
+        return self.status(session_id).name
 
     @check_session
     @check_status(DeviceStatus.READY)
@@ -171,8 +184,9 @@ class Device:
 
 
         ## Adding recording and computing here thread based
-        record_launcher = RecordLauncher(self, self._records_manager, self._memory_manager, session_id, duration, delay = delay, seed_id = seed_id)
-        record_launcher.start()
+        self._current_job = RecordLauncher(self, self._records_manager, self._memory_manager, session_id, duration, delay = delay, seed_id = seed_id)
+        self._current_job.start()
+        
 
         
 

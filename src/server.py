@@ -97,6 +97,11 @@ def start():
     device.start_record(uuid, 6, delay = delay, seed_id = seed_id)
     return device.status(uuid).name
 
+@app.route('/abort')
+def abort():
+    uuid = get_uuid()
+    return device.stop_job(uuid)
+
 
 @app.route('/last_record')
 def last_record():

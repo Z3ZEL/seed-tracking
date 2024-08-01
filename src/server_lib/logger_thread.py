@@ -21,8 +21,8 @@ class LoggerThread(Thread):
         self._device = device
 
         self._original_stdout = sys.stdout
-        
-        self._stdout = io.StringIO() if not config["dev"] else sys.stdout
+        self._log_activated = (not config["dev"] or (config["dev"] and not 'log' in config['dev']))
+        self._stdout = io.StringIO() if self._log_activated  else sys.stdout
 
     def logger(func):
         def wrapper(self : LoggerThread, *args, **kwargs):
@@ -30,15 +30,21 @@ class LoggerThread(Thread):
                 sys.stdout = self._stdout
                 func(self, *args, **kwargs)
                 sys.stdout = self._original_stdout
-                if not config["dev"]:
+                if self._log_activated:
                     self._memory_manager.log_record_output(self._session_id, self._stdout.getvalue())
             except DeviceException as e:
                 sys.stdout = self._original_stdout
-                if not config["dev"]:
+                if self._log_activated:
                     self._memory_manager.log_record_output(self._session_id, self._stdout.getvalue(), exception=e)
                 self._device.raise_error(e)
+            except RuntimeError as e:
+                sys.stdout = self._original_stdout
+                print("Aborting ...")
+                if self._log_activated:
+                    self._memory_manager.log_record_output(self._session_id, self._stdout.getvalue() + str("\nAborting ...\n"))
         return wrapper
     
+
 
 
 
