@@ -7,6 +7,7 @@ from server_lib.record import Record
 from server_lib.session_record_manager import SessionRecordManager
 from server_lib.memory_manager import MemoryManager
 from server_lib.csv_builder import CSVBuilder
+from logging import Logger
 
 from args import get_args_dict
 
@@ -29,10 +30,11 @@ class DeviceStatus(Enum):
 
 class Device:
 
-    def __init__(self) -> None:
+    def __init__(self, logger : Logger) -> None:
         self._status : DeviceStatus = DeviceStatus.WAITING
+        self._logger = logger
         self._sessions : List[UUID] = []
-        self._memory_manager = MemoryManager(CONFIG["server"]["directory"], CONFIG["server"]["temp_directory"])
+        self._memory_manager = MemoryManager(CONFIG["server"]["directory"], CONFIG["server"]["temp_directory"], self._logger)
         self._records_manager = SessionRecordManager(self._memory_manager)
         self._last_error : device_exception.DeviceException = None
         self._current_job : RecordLauncher = None

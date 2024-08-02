@@ -5,6 +5,7 @@ from server_lib.device import Device, DeviceStatus
 import server_lib.device_exception
 from args import get_args_dict
 from resource_manager import CONFIG
+import logging
 from uuid import UUID
 import time
 
@@ -12,13 +13,16 @@ true_str = ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh']
 false_str = ['false', '0', 'f', 'n', 'no', 'nope', 'nah', 'not really', 'no way']
 ## INIT DEVICE
 
-device = Device()
+
 
 ## INIT FLASK
 
 app = Flask(__name__)
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
+app.logger.setLevel(logging.INFO)
+
+device = Device(app.logger)
 
 ## Error handling
 def logError(error):
@@ -167,6 +171,6 @@ def get_image(session_id, filename):
         abort(404)
 
     
-
+app.logger.info("Server started")
 
 

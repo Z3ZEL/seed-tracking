@@ -149,6 +149,6 @@ def plot_velocity_line(m_X, m_y, s_X, s_y, m_ransac, s_ransac, fig=None, ax=None
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
     # fig.autofmt_xdate()
     
-    ax.set_xlabel('Time')
+    ax.set_xlabel('Time (ns)')
     ax.set_ylabel('Y (cm, from master origin)')
     ax.legend(loc='lower right')

@@ -6,13 +6,14 @@ import shutil
 from server_lib.device_exception import DeviceException, DeviceError
 from server_lib.csv_builder import CSVBuilder
 from server_lib.record import Record
-
+from logging import Logger
 
 
 class MemoryManager:
-    def __init__(self, dir_path : str, temp_dir : str):
+    def __init__(self, dir_path : str, temp_dir : str, logger : Logger) -> None:
         self.dir_path = dir_path
         self.temp_dir = temp_dir
+        self.logger = logger
 
         #Check if the directory exists
         if not os.path.exists(dir_path):
@@ -91,14 +92,20 @@ class MemoryManager:
         '''
             Log the output of the record
         '''
-        path = os.path.join(self.dir_path, 'logs')
-        path = os.path.join(path, f'{str(session_id)}_{time.strftime("%Y-%m-%d")}.txt')
+        # path = os.path.join(self.dir_path, 'logs')
+        # path = os.path.join(path, f'{str(session_id)}_{time.strftime("%Y-%m-%d")}.txt')
 
-        with open(path, "a+") as file:
-            file.write("###### {time} ######\n".format(time = time.strftime("%H:%M:%S")))
-            file.write(logs)
-            if exception:
-                file.write(f"[ERROR] [{str(exception.error_code)}] {str(exception)}\n")
+        # with open(path, "a+") as file:
+        #     file.write("###### {time} ######\n".format(time = time.strftime("%H:%M:%S")))
+        #     file.write(logs)
+        #     if exception:
+        #         file.write(f"[ERROR] [{str(exception.error_code)}] {str(exception)}\n")
+        output = "\n###### [{session_id}] [{time}] ######\n".format(session_id = str(session_id),time = time.strftime("%H:%M:%S"))
+        output += logs
+        if exception:
+            output += f"[ERROR] [{str(exception.error_code)}] {str(exception)}\n"
+        output += "###################\n"
+        self.logger.info(output)
 
 
 
