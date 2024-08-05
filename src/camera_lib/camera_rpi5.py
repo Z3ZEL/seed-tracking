@@ -17,18 +17,19 @@ def launch(end_timestamp : int):
 
     hasStarted = False
     with photo.stderr as pipe:
-        while time.time_ns() < end_timestamp:
-            if hasStarted:
-                time.sleep(0.01)
-                continue
-            line = pipe.readline()
-            print(line)
-            if not hasStarted and 'Output #0' in line:
-                buzz(0.5)
-                print("Started recording :", time.time_ns())          
-                hasStarted = True
-        os.kill(photo.pid, signal.SIGINT)
-        end_time = time.time_ns()
+        with open(CAMERA_LOG, "a+") as file:
+            while time.time_ns() < end_timestamp:
+                if hasStarted:
+                    time.sleep(0.01)
+                    continue
+                line = pipe.readline()
+                file.write(line)
+                if not hasStarted and 'Output #0' in line:
+                    buzz(0.5)
+                    print("Started recording :", time.time_ns())          
+                    hasStarted = True
+            os.kill(photo.pid, signal.SIGINT)
+            end_time = time.time_ns()
     print("Finished")
     # os.kill(photo.pid, signal.SIGTERM)
     photo.wait()
