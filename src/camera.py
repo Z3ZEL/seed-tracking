@@ -72,7 +72,7 @@ def launch(end_timestamp : int):
     turn_light(False)
 
     timestamp_extractor = os.system(timestamp_extractor_cmd)
-    
+    print("Extracting timestamp...")
 
     with open(PTS, 'r') as file:
         timestamps = file.readlines()
@@ -91,4 +91,4 @@ def release():
 
 import atexit
 
-# atexit.register(release)
+atexit.register(release)

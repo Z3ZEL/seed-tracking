@@ -43,8 +43,16 @@ class Computer(VelocityComputer):
         m_velocity = m_ransac.estimator_.coef_
         s_velocity = s_ransac.estimator_.coef_
 
+        if m_velocity > 0 or s_velocity > 0:
+            print("Got positive velocity, this is not supposed to happen")
+
+        m_velocity *= -1
+        s_velocity *= -1
+
         mean = float(np.mean([m_velocity, s_velocity], axis=0) * 1e7)
-        return mean , float(max(m_velocity * 1e7, s_velocity * 1e7) - mean)
+    
+
+        return mean , float(max(m_velocity * 1e7, s_velocity * 1e7) - mean) 
        
 
 

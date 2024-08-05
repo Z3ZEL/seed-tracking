@@ -18,9 +18,10 @@ def print_extra(*args):
     print(f"{out} - {psutil.cpu_percent()}%")
 
 def cool_down():
-    while psutil.cpu_percent() > 90:
-        print("Cooling down")
-        time.sleep(1)
+    pass
+    # while psutil.cpu_percent() > 90:
+    #     print("Cooling down")
+    #     time.sleep(1)
 
 
 def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
