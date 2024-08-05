@@ -1,26 +1,12 @@
 import cv2 as cv
-import os
-import glob
-import time
-import subprocess
-import re
-import signal
-import numpy as np
+import os, glob, time, subprocess, numpy as np
 
 from resource_manager import extract_timestamp, CONFIG, SOCK as sock
 from args import is_master
-import json
 
+from camera_lib.camera import PROCESSOR, FOLDER as folder, launch
+from rpi_lib.rpi_interaction import turn_light
 
-if CONFIG["hardware"] == "rpi5":
-    from camera import PROCESSOR, VIDEO_PATH as video_path, FOLDER as folder, launch
-    from rpi_interaction import turn_light
-elif CONFIG["hardware"] == "linux":
-    from camera import PROCESSOR, VIDEO_PATH as video_path, FOLDER as folder, launch
-    from rpi_interaction_mock import turn_light
-else:
-    from camera_old import PROCESSOR, VIDEO_PATH as video_path, FOLDER as folder, launch
-    from rpi_interaction_old import turn_light
 
 def trunc_json(json):
     last = json.rfind('}')
@@ -52,7 +38,7 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
     Parameters:
     outputfolder (str): The output folder
     start_timestamp (int): The start timestamp
-    end_timestamp (int): The end timestamp
+    end_timestamp (int): The end timestamp in nanoseconds
     prefix (str): The prefix of the image
     suffix (str): The suffix of the image
 
@@ -67,7 +53,6 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
     duration = (end_timestamp-start_timestamp) * 10**-9
     print("Recording for", duration, " seconds")
     # points_path = os.path.join(outputfolder,"output.pts")
-    convert_cmd = f"ffmpeg -i {video_path} {os.path.join(outputfolder, 'temp_%d.jpg')}"
 
     temps = glob.glob(os.path.join(folder,"temp*.jpg"))
     for temp in temps:
@@ -80,29 +65,15 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
         time.sleep(0.0001)
     
     print("Starting shot ",time.time_ns())
-    timestamps = launch(end_timestamp)
 
-    
-    if len(timestamps) == 0:
+    try:
+        timestamps = launch(end_timestamp)
+    except SystemExit as e:
         ##Flush sock
         sock.recvfrom(1024)
-        raise SystemExit("Not enough frames")
-    
-    
-    ## Check if there is enough frames
-    max_ts = max(timestamps)
-    min_ts = min(timestamps)
-
-    if max_ts - min_ts < duration * 1e9 * 0.2:
-        ##Flush sock
-        sock.recvfrom(1024)
-        raise SystemExit("Not enough frames")
-    
+        raise e
 
 
-    ##Convert to img
-    converter = subprocess.Popen(convert_cmd.split(" "), stdout=subprocess.DEVNULL)
-    converter.wait()
     ##Read metadata and processing
     imgs = []
     print("Processing images ...")

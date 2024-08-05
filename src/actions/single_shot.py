@@ -6,16 +6,9 @@ import subprocess
 
 from resource_manager import CONFIG, SOCK as sock
 from args import is_master
+from camera_lib.camera import PROCESSOR,FOLDER,VIDEO_PATH, launch
+from rpi_lib.rpi_interaction import turn_light
 
-if CONFIG["hardware"] == "rpi5":
-    from camera import PROCESSOR,FOLDER,VIDEO_PATH, launch
-    from rpi_interaction import turn_light
-elif CONFIG["hardware"] == "linux":
-    from camera import PROCESSOR,FOLDER,VIDEO_PATH, launch
-    from rpi_interaction_mock import turn_light
-else:
-    from camera_old import PROCESSOR,FOLDER,VIDEO_PATH, launch
-    from rpi_interaction_old import turn_light
 
 def trunc_json(json):
     last = json.rfind('}')
@@ -59,11 +52,14 @@ def shot(outputfolder, start_timestamp, prefix="m", suffix=""):
     while time.time_ns() < start_timestamp:
         time.sleep(0.0001)
     
-   
-    launch(start_timestamp + 2 * 1e9)
+    
+    try:
+        launch(start_timestamp + 2 * 1e9)
+    except SystemExit as e:
+        sock.recv(1024)
+        raise e
 
-    converter = subprocess.Popen(convert_cmd.split(" "))
-    converter.wait()
+
    
     ##Read metadata and processing
     paths = []
@@ -74,7 +70,6 @@ def shot(outputfolder, start_timestamp, prefix="m", suffix=""):
     img_path = img_paths.pop(-1)
     img = cv.imread(img_path)
     img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-    # img = cv.fastNlMeansDenoising(img, 5, 3)
     img = PROCESSOR.process(img)
     
 

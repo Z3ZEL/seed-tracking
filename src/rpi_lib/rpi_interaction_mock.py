@@ -1,5 +1,3 @@
-
-
 def turn_light(state: bool):
     print(f"[GPIO] Turn light {state}")
 def _buzz(duration:int):
