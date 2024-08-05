@@ -8,14 +8,13 @@ def launch(end_timestamp : int):
     ts = []
     start_timestamp = time.time_ns()
     if HARDWARE == "rpi3":
-        from camera_lib.camera_rpi3 import launch
-        ts = launch(end_timestamp)
+        from camera_lib.camera_rpi3 import launch as l
     elif HARDWARE == "rpi5":
-        from camera_lib.camera_rpi5 import launch
-        ts = launch(end_timestamp)
+        from camera_lib.camera_rpi5 import launch as l
     else:
-        from camera_lib.camera_mock import launch
-        ts = launch(end_timestamp)
+        from camera_lib.camera_mock import launch as l
+
+    ts = l(end_timestamp)
 
     ## Check if there is enough frames
     max_ts = max(ts)
