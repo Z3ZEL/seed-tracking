@@ -43,7 +43,7 @@ else:
             "run":False,
             "dev":False,
             "clean":False
-        } | CONFIG["production_config"] if "production_config" in CONFIG else {} 
+        } | (CONFIG["production_config"] if "production_config" in CONFIG else {} )
 
 
 def get_input_folder():
