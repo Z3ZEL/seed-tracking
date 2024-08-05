@@ -29,13 +29,13 @@ framerate=camera_conf['framerate']
 
 
 FOLDER = CONFIG["master_camera"]["temp_directory"] if is_master() else CONFIG["slave_camera"]["temp_directory"]
-VIDEO_PATH = os.path.join(FOLDER,"output.h264")
-# PTS = os.path.join(FOLDER,"pts.txt")
+VIDEO_PATH = os.path.join(FOLDER,"output.mkv")
+PTS = os.path.join(FOLDER,"pts.txt")
 # METADATA_PATH = os.path.join(FOLDER,"metadata.json")
-make_shot_cmd = lambda duration :  f"rpicam-vid --autofocus-mode manual --autofocus-range macro -s --metadata - --level 4.2 --framerate {framerate} --width {res[0]} --height {res[1]} -o {VIDEO_PATH} --shutter {camera_conf['controls']['ExposureTime']} -t {duration}  -n" #--denoise cdn_off -t {duration * 10**3}
+make_shot_cmd = lambda duration :  f"rpicam-vid --inline --autofocus-mode manual --autofocus-range macro -s --metadata - --level 4.2 --framerate {framerate} --width {res[0]} --height {res[1]} -o {VIDEO_PATH} --shutter {camera_conf['controls']['ExposureTime']} -t {duration}  -n" #--denoise cdn_off -t {duration * 10**3}
 # PHOTOGRAPHER = subprocess.Popen(shot_cmd.split(" "))
 
-timestamp_extractor_cmd = f"ffprobe {VIDEO_PATH} -hide_banner -select_streams v -show_entries frame | grep pts_time | cut -d '=' -f 2 > {FOLDER}/pts.txt"
+timestamp_extractor_cmd = f"ffprobe {VIDEO_PATH} -hide_banner -select_streams v -show_entries frame | grep pts_time | cut -d '=' -f 2 > {PTS}"
 
 print(make_shot_cmd(0   ))
 
@@ -53,26 +53,28 @@ def launch(end_timestamp : int):
     hasStarted = False
     with photo.stderr as pipe:
         while time.time_ns() < end_timestamp:
-            line = pipe.readline()
-            if line == "":
+            if hasStarted:
+                time.sleep(0.01)
                 continue
-            if not hasStarted and 'matroska' in line:
+            line = pipe.readline()
+            print(line)
+            if not hasStarted and 'Output #0' in line:
                 buzz(0.5)
                 print("Started recording :", time.time_ns())          
                 hasStarted = True
-        os.kill(photo.pid, signal.SIGUSR1)
+        os.kill(photo.pid, signal.SIGINT)
         end_time = time.time_ns()
     print("Finished")
-    os.kill(photo.pid, signal.SIGTERM)
+    # os.kill(photo.pid, signal.SIGTERM)
     photo.wait()
     
     buzz(0.5)
     turn_light(False)
 
-    timestamp_extractor = subprocess.Popen(timestamp_extractor_cmd.split(" "))
-    timestamp_extractor.wait()
+    timestamp_extractor = os.system(timestamp_extractor_cmd)
+    
 
-    with open(FOLDER + "/pts.txt", 'r') as file:
+    with open(PTS, 'r') as file:
         timestamps = file.readlines()
         timestamps = [float(ts) for ts in timestamps]
         timestamps = [end_timestamp - (ts * 1e9) for ts in timestamps]
@@ -89,4 +91,4 @@ def release():
 
 import atexit
 
-atexit.register(release)
+# atexit.register(release)
