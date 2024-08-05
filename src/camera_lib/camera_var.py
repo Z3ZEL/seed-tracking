@@ -57,6 +57,8 @@ CONVERT_CMD = f"ffmpeg -i {VIDEO_PATH} {os.path.join(FOLDER, 'temp_%d.jpg')}"
 def release():
     print("Releasing...")
     os.remove(VIDEO_PATH) if os.path.exists(VIDEO_PATH) else None
+    os.remove(PTS) if os.path.exists(PTS) else None
+    os.remove(CAMERA_LOG) if os.path.exists(CAMERA_LOG) else None
     SOCK.close()
 
 
