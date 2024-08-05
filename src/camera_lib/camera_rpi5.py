@@ -37,7 +37,7 @@ def launch(end_timestamp : int):
     buzz(0.5)
     turn_light(False)
     with open(CAMERA_LOG, "a+") as file:
-        timestamp_extractor = subprocess.Popen(EXTRACTOR_CMD.split(" "), stdout=file, stderr=file, shell=True)
+        timestamp_extractor = subprocess.Popen(EXTRACTOR_CMD, stdout=file, stderr=file, shell=True)
         timestamp_extractor.wait()
 
     print("Extracting timestamp...")
