@@ -35,6 +35,8 @@ VIDEO_PATH = os.path.join(FOLDER,"output.h264")
 make_shot_cmd = lambda duration :  f"rpicam-vid --autofocus-mode manual --autofocus-range macro -s --metadata - --level 4.2 --framerate {framerate} --width {res[0]} --height {res[1]} -o {VIDEO_PATH} --shutter {camera_conf['controls']['ExposureTime']} -t {duration}  -n" #--denoise cdn_off -t {duration * 10**3}
 # PHOTOGRAPHER = subprocess.Popen(shot_cmd.split(" "))
 
+timestamp_extractor_cmd = f"ffprobe {VIDEO_PATH} -hide_banner -select_streams v -show_entries frame | grep pts_time | cut -d '=' -f 2 > {FOLDER}/pts.txt"
+
 print(make_shot_cmd(0   ))
 
 
@@ -47,28 +49,35 @@ def launch(end_timestamp : int):
     photo = subprocess.Popen(make_shot_cmd(0).split(" "),stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     p = psutil.Process(photo.pid)
     p.nice(-20)
-    buffer = []
 
     hasStarted = False
-    with photo.stdout as pipe:
+    with photo.stderr as pipe:
         while time.time_ns() < end_timestamp:
             line = pipe.readline()
             if line == "":
                 continue
-            if not hasStarted:
+            if not hasStarted and 'matroska' in line:
                 buzz(0.5)
                 print("Started recording :", time.time_ns())          
                 hasStarted = True
-            if "SensorTimestamp" in line:
-                buffer.append(int(line.split(":")[-1].replace(",","").replace(" ", "").replace("\n","")) + SYSTEM_BOOTED)
         os.kill(photo.pid, signal.SIGUSR1)
+        end_time = time.time_ns()
     print("Finished")
     os.kill(photo.pid, signal.SIGTERM)
     photo.wait()
     
     buzz(0.5)
     turn_light(False)
-    return buffer
+
+    timestamp_extractor = subprocess.Popen(timestamp_extractor_cmd.split(" "))
+    timestamp_extractor.wait()
+
+    with open(FOLDER + "/pts.txt", 'r') as file:
+        timestamps = file.readlines()
+        timestamps = [float(ts) for ts in timestamps]
+        timestamps = [end_timestamp - (ts * 1e9) for ts in timestamps]
+
+    return timestamps
 
 def release():
     print("Releasing...")
