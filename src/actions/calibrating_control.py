@@ -99,17 +99,14 @@ def calibrating_control(config: dict, realtime_testing):
         exit(0)
 
     #--------------Realtime testing--------------
-    from actions.single_shot import shot, send_shot, fetch_shot
+    from actions.single_shot import shot, fetch_shot, send_shot
 
 
-    #Open socket
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-
+ 
     while True:
         target_timestamp = time.time_ns() + (1 * 10**9)
 
-        send_shot(sock, target_timestamp, config, suffix = target_timestamp)        
+        send_shot(target_timestamp, config, suffix = target_timestamp)        
         
         m_path, s_path = shot(config["master_camera"]["temp_directory"],target_timestamp, suffix=target_timestamp)
 
