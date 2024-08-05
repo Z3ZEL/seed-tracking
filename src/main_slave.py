@@ -54,3 +54,6 @@ def main():
             print(e)
             pass
 
+
+if __name__ == "__main__":
+    main()
