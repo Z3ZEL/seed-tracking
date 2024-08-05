@@ -172,7 +172,7 @@ def main():
     if kwargs['run']:
         import time, os
         from actions.multiple_shot import shot, fetch_shot, send_shot
-        from actions.calculate import calculate_real_world_position, calculate_velocity
+        from actions.calculate import calculate_real_world_position, calculate_velocity, calculate_max_xz_gap
         
         number = int(input("Enter an ID number"))
         duration = 4
