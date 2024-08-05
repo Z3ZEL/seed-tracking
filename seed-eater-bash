@@ -5,7 +5,7 @@ SCRIPT_PATH=$(realpath "$0")
 SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
 
 # Store the command in a temp variable
-CMD="source '$SCRIPT_DIR/.env/bin/activate' && exec python src/main.py $@"
+CMD="$SCRIPT_DIR/.env/bin/python src/main.py $@"
 
 # Run the command with sudo and preserve the environment
 sudo -E bash -c "$CMD"
