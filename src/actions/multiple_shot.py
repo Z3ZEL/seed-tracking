@@ -6,11 +6,21 @@ import subprocess
 import re
 import signal
 import numpy as np
-from rpi_interaction import turn_light
+
 from resource_manager import extract_timestamp, CONFIG, SOCK as sock
 from args import is_master
 import json
-from camera import PROCESSOR, VIDEO_PATH as video_path, FOLDER as folder, launch
+
+
+if CONFIG["hardware"] == "rpi5":
+    from camera import PROCESSOR, VIDEO_PATH as video_path, FOLDER as folder, launch
+    from rpi_interaction import turn_light
+elif CONFIG["hardware"] == "linux":
+    from camera import PROCESSOR, VIDEO_PATH as video_path, FOLDER as folder, launch
+    from rpi_interaction_mock import turn_light
+else:
+    from camera_old import PROCESSOR, VIDEO_PATH as video_path, FOLDER as folder, launch
+    from rpi_interaction_old import turn_light
 
 def trunc_json(json):
     last = json.rfind('}')

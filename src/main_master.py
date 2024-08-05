@@ -36,10 +36,6 @@ def main():
     if verbose:
         kwargs["show"] = True
 
-    if(kwargs['camera_test']):
-        from camera import camera_test
-        camera_test()
-        exit(0)
     if(kwargs['clean']):
         from actions.clean import clean
         clean(config)
@@ -122,12 +118,6 @@ def main():
             for path in m_paths + s_paths:
                 os.remove(path)
         exit(0)
-    if(kwargs["shot"] == 'stress'):
-        from camera import camera_test
-
-        camera_test()
-        exit(0)
-        
     if(kwargs['calibrate']):
         from actions.calibrate import calibrate
 

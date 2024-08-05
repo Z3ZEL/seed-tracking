@@ -3,11 +3,19 @@ import time
 import glob
 import cv2 as cv
 import subprocess
-from camera import PROCESSOR,FOLDER,VIDEO_PATH, launch
-from rpi_interaction import turn_light
+
 from resource_manager import CONFIG, SOCK as sock
 from args import is_master
 
+if CONFIG["hardware"] == "rpi5":
+    from camera import PROCESSOR,FOLDER,VIDEO_PATH, launch
+    from rpi_interaction import turn_light
+elif CONFIG["hardware"] == "linux":
+    from camera import PROCESSOR,FOLDER,VIDEO_PATH, launch
+    from rpi_interaction_mock import turn_light
+else:
+    from camera_old import PROCESSOR,FOLDER,VIDEO_PATH, launch
+    from rpi_interaction_old import turn_light
 
 def trunc_json(json):
     last = json.rfind('}')
