@@ -28,7 +28,22 @@ else:
         return None
             
     def get_args_dict():
-        return {"slave":False, "plot":True, "verbose":False, "dry_run":False, "input":"data", "shot":None, "calibrate":None, "check_calibrate":False, "camera_test":False, "calculate":False, "run":False, "dev":False, "clean":False}
+        ### Production configuration
+        return {
+            "slave":False,
+            "plot":True,
+            "verbose":False,
+            "dry_run":False,
+            "input":"data",
+            "shot":None,
+            "calibrate":None,
+            "check_calibrate":False,
+            "camera_test":False,
+            "calculate":False,
+            "run":False,
+            "dev":False,
+            "clean":False
+        } | CONFIG["production_config"] if "production_config" in CONFIG else {} 
 
 
 def get_input_folder():
