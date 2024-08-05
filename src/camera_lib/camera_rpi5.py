@@ -1,8 +1,8 @@
 import os
 import time
-import signal
+import signal, subprocess
 from rpi_lib.rpi_interaction import turn_light, buzz
-from camera_lib.camera_var import EXTRACTOR_CMD, PTS, FOLDER
+from camera_lib.camera_var import EXTRACTOR_CMD, PTS, CAMERA_LOG
 from camera_lib.camera_common import convert, launch_shot
 
 
@@ -35,8 +35,10 @@ def launch(end_timestamp : int):
     
     buzz(0.5)
     turn_light(False)
+    with open(CAMERA_LOG, "a+") as file:
+        timestamp_extractor = subprocess.Popen(EXTRACTOR_CMD.split(" "), stdout=file, stderr=file, shell=True)
+        timestamp_extractor.wait()
 
-    timestamp_extractor = os.system(EXTRACTOR_CMD)
     print("Extracting timestamp...")
 
     with open(PTS, 'r') as file:

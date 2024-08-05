@@ -27,6 +27,8 @@ def launch(end_timestamp : int):
     
     if max_ts - min_ts < (end_timestamp - start_timestamp) * 0.2:
         raise SystemExit("The captured window is too small")
+
+    return ts
     
 
 

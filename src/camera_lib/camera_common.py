@@ -1,8 +1,8 @@
 import subprocess, psutil
-from camera_lib.camera_var import CONVERT_CMD, CONVERT_LOG, SHOT_CMD
+from camera_lib.camera_var import CONVERT_CMD, CAMERA_LOG, SHOT_CMD
 
 def convert():
-    with open(CONVERT_LOG, 'w') as file:
+    with open(CAMERA_LOG, 'w') as file:
         #run the command
         converter = subprocess.Popen(CONVERT_CMD.split(" "), stdout=subprocess.DEVNULL, stderr=file)
         converter.wait()

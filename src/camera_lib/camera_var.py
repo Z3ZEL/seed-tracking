@@ -24,7 +24,7 @@ framerate=camera_conf['framerate']
 
 
 FOLDER = CONFIG["master_camera"]["temp_directory"] if is_master() else CONFIG["slave_camera"]["temp_directory"]
-CONVERT_LOG = os.path.join(FOLDER,"convert.log")
+CAMERA_LOG = os.path.join(FOLDER,"camera.log")
 PTS = os.path.join(FOLDER,"pts.txt")
 
 
