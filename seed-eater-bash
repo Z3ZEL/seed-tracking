@@ -8,4 +8,4 @@ SCRIPT_DIR=$(dirname "$SCRIPT_PATH")
 CMD="$SCRIPT_DIR/.env/bin/python src/main.py $@"
 
 # Run the command with sudo and preserve the environment
-sudo -E bash -c "$CMD"
+bash -c "$CMD"
