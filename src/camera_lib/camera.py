@@ -1,5 +1,5 @@
 import time
-from camera_lib.camera_var import HARDWARE, FOLDER as FOLDER, PTS as PTS, VIDEO_PATH as VIDEO_PATH, PROCESSOR as PROCESSOR
+from camera_lib.camera_var import HARDWARE, FOLDER as FOLDER, PTS as PTS, VIDEO_PATH as VIDEO_PATH, PROCESSOR as PROCESSOR, CAMERA_LOG as CAMERA_LOG
 
 def launch(end_timestamp : int):
     '''

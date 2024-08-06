@@ -4,7 +4,7 @@ import os, glob, time, subprocess, numpy as np
 from resource_manager import extract_timestamp, CONFIG, SOCK as sock
 from args import is_master
 
-from camera_lib.camera import PROCESSOR, FOLDER as folder, launch
+from camera_lib.camera import PROCESSOR, FOLDER as folder, launch, CAMERA_LOG
 from rpi_lib.rpi_interaction import turn_light
 
 
@@ -21,8 +21,9 @@ def trunc_json(json):
 
 
 def fetch_shot(config, number):
-    proc = subprocess.Popen(f'scp {config["slave_camera"]["camera_host"]}@{config["slave_camera"]["camera_address"]}:{config["slave_camera"]["temp_directory"]}/s_img_* {config["master_camera"]["temp_directory"]}'.split(" "), stdout=subprocess.DEVNULL)
-    proc.wait()
+    with open(CAMERA_LOG, "a+") as file:
+        proc = subprocess.Popen(f'scp {config["slave_camera"]["camera_host"]}@{config["slave_camera"]["camera_address"]}:{config["slave_camera"]["temp_directory"]}/s_img_* {config["master_camera"]["temp_directory"]}'.split(" "), stdout=file, stderr=file)
+        proc.wait()
     file = os.path.join(config["master_camera"]["temp_directory"],f"s_img_*_{number}.jpg")
     paths = glob.glob(file)
     if len(paths) < 1:
