@@ -34,6 +34,7 @@ else:
             "plot":True,
             "verbose":False,
             "dry_run":False,
+            "display":False,
             "input":"data",
             "shot":None,
             "calibrate":None,
