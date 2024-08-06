@@ -22,7 +22,13 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 app.logger.setLevel(logging.INFO)
 
+if CONFIG["production"]:
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
+
 device = Device(app.logger)
+
 
 ## Error handling
 def logError(error):
