@@ -5,8 +5,8 @@
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [On a regular computer for development](#on-a-regular-computer-for-development)
-  - [On the Master RPI](#on-the-master-rpi)
-  - [On the Slave RPI](#on-the-slave-rpi)
+  - [On the main RPI](#on-the-main-rpi)
+  - [On the worker RPI](#on-the-worker-rpi)
 - [The CLI (Command Line Interface), for admin user](#the-cli-command-line-interface-for-admin-user)
 - [Development of the Seed Tracker](#development-of-the-seed-tracker)
   - [Improve The Seed Position Algorithm](#improve-the-seed-position-algorithm)
@@ -30,18 +30,18 @@ This is the main repository for the Seed Tracker project. Which is an open sourc
 
 ## On a regular computer for development
 
-## On the Master RPI
+## On the main RPI
 
 
-## On the Slave RPI
+## On the worker RPI
   After you configure the `config.json` correctly (see [here](https://eng-git.canterbury.ac.nz/fgi18/seed-tracking/-/wikis/Quick-Start-(Using-the-Instrument)/The-config-file)). 
 
-  On the slave you just need to start the listener server worker. You can do this by running the following command:
+  On the worker you just need to start the listener server worker. You can do this by running the following command:
   ```bash
   ./seed-eater-bash -s 
   ```
 
-  You can also program the slave to start the listener server worker on boot. To do this, you can add the following line to the `rc.local` file. 
+  You can also program the worker to start the listener server worker on boot. To do this, you can add the following line to the `rc.local` file. 
   ```bash
   /absolut_path_to_your_repo/seed-eater-bash -s
   ```
@@ -88,7 +88,7 @@ This is the main repository for the Seed Tracker project. Which is an open sourc
   ```plaintext
   m:x,s:x,v:x
   ``` 
-  m stand for the number of seeds in the master images, s for the number of seeds in the slave images and v for the velocity of the seeds. If you don't know the real velocity of the seed on the sample you can put `-1`.
+  m stand for the number of seeds in the main images, s for the number of seeds in the worker images and v for the velocity of the seeds. If you don't know the real velocity of the seed on the sample you can put `-1`.
 
   To run the test you can run the following command : 
   ```bash

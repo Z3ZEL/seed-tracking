@@ -10,12 +10,12 @@ class Computer(DataCleaner):
         This cleaning algorithm computes the median and remove the points that are too far from the median.
 
         Args:
-            m_img_coords (list): pos, ts for master image.
-            s_img_coords (list): pos, ts for slave image.   
+            m_img_coords (list): pos, ts for main image.
+            s_img_coords (list): pos, ts for worker image.   
 
         Returns:
-            list: Cleaned master image coordinates.
-            list: Cleaned slave image coordinates.
+            list: Cleaned main image coordinates.
+            list: Cleaned worker image coordinates.
 
         '''
 

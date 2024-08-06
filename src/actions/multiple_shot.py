@@ -44,8 +44,8 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
     suffix (str): The suffix of the image
 
     Returns:
-    list: Master image paths
-    list: Slave image paths
+    list: main image paths
+    list: worker image paths
     roi : Range of interest (min, max)
     '''
     #flush socket
@@ -121,9 +121,9 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
     if not(is_master()):
         return paths
 
-    print("Fetching slave images ...")
+    print("Fetching worker images ...")
 
-    #Waiting for the slave to finish
+    #Waiting for the worker to finish
     res, addr = sock.recvfrom(1024)
     if "done".encode('utf-8') not in res:
         print("Error : ",res.decode("utf-8"))
@@ -154,7 +154,7 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
     s_data = np.column_stack((s_paths,s_timestamps))
 
 
-    print(f"Fetched {len(m_data)} for master and {len(s_data)} for slave")
+    print(f"Fetched {len(m_data)} for main and {len(s_data)} for worker")
 
     
     min_ts = max(m_timestamps.min(), s_timestamps.min())
@@ -167,7 +167,7 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
     m_remove = m_data[(m_timestamps < min_ts) | (m_timestamps > max_ts)]
     s_remove = s_data[(s_timestamps < min_ts) | (s_timestamps > max_ts)]
 
-    print(f"Interesting range is {len(m_data_filtered)} for master and {len(s_data_filtered)} for slave ({round((max_ts-min_ts)*1e-9, 2)} s )")
+    print(f"Interesting range is {len(m_data_filtered)} for main and {len(s_data_filtered)} for worker ({round((max_ts-min_ts)*1e-9, 2)} s )")
 
     print("Cleaning...")
 

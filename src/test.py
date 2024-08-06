@@ -47,7 +47,7 @@ def test_case(zip_path):
     m_paths = glob.glob(f"test/temp/{zip_name}/m_*.jpg")
     s_paths = glob.glob(f"test/temp/{zip_name}/s_*.jpg")
 
-    print(f"Found {len(m_paths)} for master and {len(s_paths)} for slave")
+    print(f"Found {len(m_paths)} for main and {len(s_paths)} for worker")
 
     info = parse_test_file(f"test/temp/{zip_name}/test")   
 
@@ -65,7 +65,7 @@ def test_case(zip_path):
     silencer_deactivate()
 
     
-    print(f"Master : detected {len(m_computed)} seeds out of {info['m']} / Slave : detected {len(s_computed)} seeds out of {info['s']}")
+    print(f"main : detected {len(m_computed)} seeds out of {info['m']} / worker : detected {len(s_computed)} seeds out of {info['s']}")
     print(f"Expected velocity: {info['v']}, Computed velocity: {velocity[0]}")
 
 

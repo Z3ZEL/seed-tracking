@@ -9,8 +9,8 @@ class VelocityComputer(NumericalComputer):
         Computes the velocity of the object.
 
         Args:
-            m_vector4 (np.array): Master vector (x,y,z,t).
-            s_vector4 (np.array): Slave vector (x,y,z,t).
+            m_vector4 (np.array): main vector (x,y,z,t).
+            s_vector4 (np.array): worker vector (x,y,z,t).
 
 
         Returns:

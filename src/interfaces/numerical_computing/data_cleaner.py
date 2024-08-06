@@ -9,13 +9,13 @@ class DataCleaner(NumericalComputer):
         Perform cleaning on the dataset of seed positions, in image coordinates.
 
         Args:
-            m_pos_ts (list): pos, ts for master image.
-            s_pos_ts (list): pos, ts for slave image.
+            m_pos_ts (list): pos, ts for main image.
+            s_pos_ts (list): pos, ts for worker image.
 
 
         Returns:
-            list: Cleaned master image coordinates.
-            list: Cleaned slave image coordinates.
+            list: Cleaned main image coordinates.
+            list: Cleaned worker image coordinates.
 
         '''
 

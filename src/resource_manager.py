@@ -52,16 +52,16 @@ def load_camera_configuration() -> list[np.array, np.array, np.array, np.array, 
     Returns:
 
     mtx1: np.array
-        Camera matrix of the master camera
+        Camera matrix of the main camera
 
     dist1: np.array
-        Distortion coefficients of the master camera
+        Distortion coefficients of the main camera
 
     mtx2: np.array
-        Camera matrix of the slave camera
+        Camera matrix of the worker camera
 
     dist2: np.array
-        Distortion coefficients of the slave camera
+        Distortion coefficients of the worker camera
 
     R: np.array
         Rotation matrix

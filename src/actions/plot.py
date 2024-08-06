@@ -92,7 +92,7 @@ def plot_seed_positions(m_computed, s_computed, **kwargs):
 
     # Formatting the plot
     plt.xlabel('Timestamp')
-    plt.ylabel('Y Position (cm from master origin)')
+    plt.ylabel('Y Position (cm from main origin)')
     plt.title('Computed Y Position Over Time')
     plt.legend()
 
@@ -116,7 +116,7 @@ def plot_mean_x(m_savePos, s_savePos, m_x_mean, s_x_mean, **kwargs):
     plt.axvline(x=s_x_mean, color='b')
 
     # Add legend
-    plt.legend(["Master Camera", "Slave Camera", "Master Camera Mean", "Slave Camera Mean"])
+    plt.legend(["main Camera", "worker Camera", "main Camera Mean", "worker Camera Mean"])
     plt.xlabel(" X Position (px)")
     plt.ylabel(" Y Position (px)")
     
@@ -150,5 +150,5 @@ def plot_velocity_line(m_X, m_y, s_X, s_y, m_ransac, s_ransac, fig=None, ax=None
     # fig.autofmt_xdate()
     
     ax.set_xlabel('Time (ns)')
-    ax.set_ylabel('Y (cm, from master origin)')
+    ax.set_ylabel('Y (cm, from main origin)')
     ax.legend(loc='lower right')

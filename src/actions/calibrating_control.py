@@ -51,7 +51,7 @@ def DLT(P1, P2, point1, point2):
 def calibrating_control(config: dict, realtime_testing):
     print("Calibrating control tool")
     if realtime_testing:
-        print(" > You can click on the image to get the computed distance from the master camera")
+        print(" > You can click on the image to get the computed distance from the main camera")
         print(" > Pressing the ESC key will shot a picture")
         print(" > You can exit by pressing Ctrl-C in terminal")
     
@@ -122,12 +122,12 @@ def calibrating_control(config: dict, realtime_testing):
 
 
 
-        cv.namedWindow("Master Camera", cv.WINDOW_AUTOSIZE) 
-        cv.imshow("Master Camera", m_img)
-        cv.setMouseCallback('Master Camera',lambda event, x, y, flags, param : get_mouse_coord(event, x, y, True))
-        cv.namedWindow("Slave Camera", cv.WINDOW_AUTOSIZE) 
-        cv.imshow("Slave Camera", s_img)
-        cv.setMouseCallback('Slave Camera',lambda event, x, y, flags, param : get_mouse_coord(event, x, y, False))
+        cv.namedWindow("main Camera", cv.WINDOW_AUTOSIZE) 
+        cv.imshow("main Camera", m_img)
+        cv.setMouseCallback('main Camera',lambda event, x, y, flags, param : get_mouse_coord(event, x, y, True))
+        cv.namedWindow("worker Camera", cv.WINDOW_AUTOSIZE) 
+        cv.imshow("worker Camera", s_img)
+        cv.setMouseCallback('worker Camera',lambda event, x, y, flags, param : get_mouse_coord(event, x, y, False))
         
         global m_mouse, s_mouse
         
@@ -145,11 +145,11 @@ def calibrating_control(config: dict, realtime_testing):
                     break
                 if m_mouse and not(temp_m_mouse):
                     temp = cv.circle(m_img.copy(), (m_mouseX,m_mouseY), radius = 5, color = color, thickness=-1)
-                    cv.imshow("Master Camera", temp)        
+                    cv.imshow("main Camera", temp)        
                     temp_m_mouse = True
                 if s_mouse and not(temp_s_mouse):
                     temp = cv.circle(s_img.copy(), (s_mouseX,s_mouseY), radius = 5, color = color, thickness=-1)
-                    cv.imshow("Slave Camera", temp)
+                    cv.imshow("worker Camera", temp)
                     temp_s_mouse = True
                 if m_mouse and s_mouse:
                     color = random_color()
@@ -158,10 +158,10 @@ def calibrating_control(config: dict, realtime_testing):
                     real_world_point = DLT(P1, P2, (m_mouseX, m_mouseY), (s_mouseX, s_mouseY))
 
                     print("Computed result : ")
-                    print("Master Camera image point : ", (m_mouseX, m_mouseY))
-                    print("Slave Camera image point : ", (s_mouseX, s_mouseY))
+                    print("main Camera image point : ", (m_mouseX, m_mouseY))
+                    print("worker Camera image point : ", (s_mouseX, s_mouseY))
                     print("Real world point : ", real_world_point)
-                    print("Distance from the master camera : ", np.linalg.norm(real_world_point))
+                    print("Distance from the main camera : ", np.linalg.norm(real_world_point))
 
 
 

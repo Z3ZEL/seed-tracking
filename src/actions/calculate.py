@@ -29,18 +29,18 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     Calculate the real world position of the seeds in the images.
 
     Args:
-        m_paths (list): List of master images path.
-        s_paths (list): List of slave images path.
+        m_paths (list): List of main images path.
+        s_paths (list): List of worker images path.
 
     Returns:
-        m_computed (list): List of computed master positions.
-        s_computed (list): List of computed slave positions.
+        m_computed (list): List of computed main positions.
+        s_computed (list): List of computed worker positions.
     '''
     ## Arg
     verbose = kwargs["verbose"]
     ## Calculation number
     
-    ## Pipeline for master and slave
+    ## Pipeline for main and worker
     m_background_substractor = BackgroundSubstractionPipeline(**kwargs)
     s_background_substractor = BackgroundSubstractionPipeline(**kwargs)
 
@@ -61,7 +61,7 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     m_img_datas = list(map(lambda name : (name, extract_timestamp(name)), m_img_datas))
     s_img_datas = list(map(lambda name : (name, extract_timestamp(name)), s_img_datas))
 
-    print_extra(f"Found {len(m_imgs)} for master and {len(s_imgs)} for slave")
+    print_extra(f"Found {len(m_imgs)} for main and {len(s_imgs)} for worker")
 
 
     id = extract_id(m_img_datas[0][0])
@@ -82,20 +82,20 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
 
     
     #Apply the optimizers
-    print_extra("Optimizing master...")
+    print_extra("Optimizing main...")
     OptimizerApplier([
         SmoothOptimizer(image_set = m_imgs, iteration=2, kernel_size=5)
     ]).apply(m_background_substractor)
 
     cool_down()
 
-    print_extra("Optimizing slave...")
+    print_extra("Optimizing worker...")
     OptimizerApplier([
         SmoothOptimizer(image_set = s_imgs, iteration=2, kernel_size=5)
     ]).apply(s_background_substractor)
 
     cool_down()
-    print_extra("Processing Master images...")
+    print_extra("Processing main images...")
     m_saveIms = []
     m_savePos = []
 
@@ -120,9 +120,9 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
 
     cool_down()
 
-    print_extra(f"Found {len(m_saveIms)} seeds for master")
+    print_extra(f"Found {len(m_saveIms)} seeds for main")
 
-    print_extra("Processing Slave images...")
+    print_extra("Processing worker images...")
     s_savePos = []
     s_saveIms = []
 
@@ -138,7 +138,7 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
             out = cv2.hconcat([im, out])
             s_saveIms.append(out)
 
-    print_extra(f"Found {len(s_saveIms)} seeds for slave")
+    print_extra(f"Found {len(s_saveIms)} seeds for worker")
     
     if(len(m_saveIms) == 0 or len(s_saveIms) == 0):
         print("There must be at least one seed detected on both camera")
@@ -158,16 +158,16 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     plot_frame_with_timestamp([i for i in range(len(m_imgs))], [ts for name,ts in m_img_datas], [ts for pos,ts in m_savePos], [i for i in range(len(s_imgs))], [ts for name,ts in s_img_datas], [ts for pos,ts in s_savePos])
     
     
-    ## Compute a mean of X of both master and slave to provide a reference for the other when triangulating
+    ## Compute a mean of X of both main and worker to provide a reference for the other when triangulating
     m_x_mean = np.median([pos[0] for pos, ts in m_savePos])
     s_x_mean = np.median([pos[0] for pos, ts in s_savePos])
 
     ## Print distance from mean for both camera
-    print("Distance from mean for master camera ", m_x_mean)
+    print("Distance from mean for main camera ", m_x_mean)
     for pos, ts in m_savePos:
         print(np.linalg.norm(pos[0] - m_x_mean))
     
-    print("Distance from mean for slave camera ", s_x_mean)
+    print("Distance from mean for worker camera ", s_x_mean)
     for pos, ts in s_savePos:
         print(np.linalg.norm(pos[0] - s_x_mean))
     
@@ -180,7 +180,7 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     m_points = [((m_x_mean,pos[1]),(s_x_mean, pos[1]), ts) for pos, ts in m_savePos]
     s_points = [((m_x_mean,pos[1]),(s_x_mean, pos[1]), ts) for pos, ts in s_savePos]
 
-    print_extra("Compute master points")
+    print_extra("Compute main points")
 
     m_computed = []
 
@@ -190,7 +190,7 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
         m_computed.append((x,y,z,ts))
 
 
-    print_extra("Compute slave points")
+    print_extra("Compute worker points")
 
     s_computed = []
 
@@ -219,12 +219,12 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     ## Plot 
     if kwargs["display"]:
         for im in m_saveIms:
-            cv2.imshow("Master", im)
+            cv2.imshow("main", im)
             cv2.waitKey(500)
             cv2.destroyAllWindows()
 
         for im in s_saveIms:
-            cv2.imshow("Slave", im)
+            cv2.imshow("worker", im)
             cv2.waitKey(500)
             cv2.destroyAllWindows()
 
@@ -232,10 +232,10 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     plot_seed_positions(m_computed, s_computed)
     
 
-    print("Master computed points")
+    print("main computed points")
     print(m_computed)
 
-    print("Slave computed points")
+    print("worker computed points")
     print(s_computed)
 
     return m_computed, s_computed
@@ -246,8 +246,8 @@ def calculate_velocity(m_computed, s_computed, config, **kwargs):
 
 
     Args:
-        m_computed (list): List of computed master positions.
-        s_computed (list): List of computed slave positions.
+        m_computed (list): List of computed main positions.
+        s_computed (list): List of computed worker positions.
 
     Returns:
         velocity (float): The computed
@@ -270,8 +270,8 @@ def calculate_max_xz_gap(m_computed, s_computed):
     Calculate the gap between the min and max on both x and z axis.
 
     Args:
-        m_computed (list): List of computed master positions.
-        s_computed (list): List of computed slave positions.
+        m_computed (list): List of computed main positions.
+        s_computed (list): List of computed worker positions.
 
     Returns:
        (x_distance, z_distance) (tuple): The gap between the min and max on both x and z axis.

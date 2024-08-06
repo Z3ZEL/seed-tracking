@@ -55,7 +55,7 @@ def main():
             target_timestamp = int(time.time_ns() + (2 * 10**9)) # 1 second shift
 
 
-            # Send cmd to slave
+            # Send cmd to worker
             send_shot(target_timestamp, config, suffix=current)
             
             m_path, s_path = shot("output", target_timestamp,suffix=current)
@@ -66,8 +66,8 @@ def main():
             if(kwargs['plot']):
                 m_img = cv2.imread(m_path)
                 s_img = cv2.imread(s_path)
-                cv2.imshow("Master", m_img)
-                cv2.imshow("Slave", s_img)
+                cv2.imshow("main", m_img)
+                cv2.imshow("worker", s_img)
                 cv2.waitKey(3000)
                 cv2.destroyAllWindows()
 
@@ -123,7 +123,7 @@ def main():
 
         dirs = args.get_input_folder().split(',')
         if len(dirs) != 2:
-            print("Error : you must provide two directories to --input separated by comma, the first for the master camera , the second for the slave")
+            print("Error : you must provide two directories to --input separated by comma, the first for the main camera , the second for the worker")
             exit(1)
         
         calibrate(dirs[0], dirs[1], config["calibration"],kwargs["dry_run"], plot, kwargs['calibrate'])

@@ -92,8 +92,8 @@ def stereo_camera_calibration(c1_images, c2_images, mtx1, dist1, mtx2, dist2, si
     
             cv.drawChessboardCorners(frame2, (rows,columns), corners2, c_ret2)
             if plot:
-                cv.imshow('Master img', frame1)
-                cv.imshow('Slave img', frame2)
+                cv.imshow('main img', frame1)
+                cv.imshow('worker img', frame2)
                 cv.waitKey(1000)
             
     
@@ -140,12 +140,12 @@ def calibrate(master_camera_files:str, slave_camera_files:str, config:dict, dry_
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.1)
 
     if single:
-        print("Calibrating Master Camera ...")
+        print("Calibrating main Camera ...")
         ret1, mtx1, dist1 = single_camera_calibration(copy_image_array(m_images), m_images_names, (rows,columns), config["square_size"], criteria, (5,5), plot)
-        print("RMSE Master Camera : ", ret1)
-        print("Calibrating Slave Camera ...")
+        print("RMSE main Camera : ", ret1)
+        print("Calibrating worker Camera ...")
         ret2, mtx2, dist2 = single_camera_calibration(copy_image_array(s_images), s_images_names, (rows,columns), config["square_size"], criteria, (5,5), plot) 
-        print("RMSE Slave Camera : ", ret2)
+        print("RMSE worker Camera : ", ret2)
     else:
         print("Loading camera matrixs and dists")
         from resource_manager import extract_matrix_and_dist, CONFIG
@@ -164,7 +164,7 @@ def calibrate(master_camera_files:str, slave_camera_files:str, config:dict, dry_
 
     print("------ RESULT ------")
 
-    print("-- Master Camera --")
+    print("-- main Camera --")
 
     print("Camera Matrix")
     print(mtx1)
@@ -174,7 +174,7 @@ def calibrate(master_camera_files:str, slave_camera_files:str, config:dict, dry_
     print(dist1)
     print()
 
-    print("-- Slave Camera --")
+    print("-- worker Camera --")
     print("Camera Matrix")
     print(mtx2)
     print()
