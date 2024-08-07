@@ -1,13 +1,13 @@
-from args import is_master
+from args import is_main
 
 def build_server():
     from server import app
     return app
 
 
-if is_master():
-    from main_master import main
+if is_main():
+    from main_main import main
     main()
 else:
-    from main_slave import main
+    from main_worker import main
     main()

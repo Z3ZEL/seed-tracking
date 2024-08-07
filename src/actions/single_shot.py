@@ -5,7 +5,7 @@ import cv2 as cv
 import subprocess
 
 from resource_manager import CONFIG, SOCK as sock
-from args import is_master
+from args import is_main
 from camera_lib.camera import PROCESSOR,FOLDER,VIDEO_PATH, launch
 from rpi_lib.rpi_interaction import turn_light
 
@@ -23,8 +23,8 @@ def trunc_json(json):
 
 
 def fetch_shot(config, number):
-    proc = os.system(f'scp {config["slave_camera"]["camera_host"]}@{config["slave_camera"]["camera_address"]}:{config["slave_camera"]["temp_directory"]}/s_* {config["master_camera"]["temp_directory"]}')
-    file = os.path.join(config["master_camera"]["temp_directory"],f"s_*_{number}.jpg")
+    proc = os.system(f'scp {config["worker_camera"]["camera_host"]}@{config["worker_camera"]["camera_address"]}:{config["worker_camera"]["temp_directory"]}/s_* {config["main_camera"]["temp_directory"]}')
+    file = os.path.join(config["main_camera"]["temp_directory"],f"s_*_{number}.jpg")
     path = glob.glob(file)
     if len(path) < 1:
         print("Error can't find image")
@@ -81,7 +81,7 @@ def shot(outputfolder, start_timestamp, prefix="m", suffix=""):
     for to_remove in img_paths:
         os.remove(to_remove)
     
-    if not is_master():
+    if not is_main():
         return new_path
     
     time.sleep(2)
@@ -97,7 +97,7 @@ def shot(outputfolder, start_timestamp, prefix="m", suffix=""):
 
 def send_shot(target_timestamp, config, suffix=""):
     message = ("single" + ":" + str(target_timestamp) + ":" + str(suffix)).encode('utf-8')
-    sock.sendto(message, (config["slave_camera"]["camera_address"], config["socket_port"]))
+    sock.sendto(message, (config["worker_camera"]["camera_address"], config["socket_port"]))
 
 
 

@@ -2,7 +2,7 @@ import cv2 as cv
 import os, glob, time, subprocess, numpy as np
 
 from resource_manager import extract_timestamp, CONFIG, SOCK as sock
-from args import is_master
+from args import is_main
 
 from camera_lib.camera import PROCESSOR, FOLDER as folder, launch, CAMERA_LOG
 from rpi_lib.rpi_interaction import turn_light
@@ -22,9 +22,9 @@ def trunc_json(json):
 
 def fetch_shot(config, number):
     with open(CAMERA_LOG, "a+") as file:
-        proc = subprocess.Popen(f'scp {config["slave_camera"]["camera_host"]}@{config["slave_camera"]["camera_address"]}:{config["slave_camera"]["temp_directory"]}/s_img_* {config["master_camera"]["temp_directory"]}'.split(" "), stdout=file, stderr=file)
+        proc = subprocess.Popen(f'scp {config["worker_camera"]["camera_host"]}@{config["worker_camera"]["camera_address"]}:{config["worker_camera"]["temp_directory"]}/s_img_* {config["main_camera"]["temp_directory"]}'.split(" "), stdout=file, stderr=file)
         proc.wait()
-    file = os.path.join(config["master_camera"]["temp_directory"],f"s_img_*_{number}.jpg")
+    file = os.path.join(config["main_camera"]["temp_directory"],f"s_img_*_{number}.jpg")
     paths = glob.glob(file)
     if len(paths) < 1:
         print("Error can't find image")
@@ -118,7 +118,7 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
         paths.append(new_path)
     
 
-    if not(is_master()):
+    if not(is_main()):
         return paths
 
     print("Fetching worker images ...")
@@ -182,7 +182,7 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
 
 def send_shot(start_timestamp, end_timestamp, config, suffix=""):
     message = ("multiple" + ":" + str(start_timestamp) + ":" + str(end_timestamp) + ":" + str(suffix)).encode('utf-8')
-    sock.sendto(message, (config["slave_camera"]["camera_address"], config["socket_port"]))
+    sock.sendto(message, (config["worker_camera"]["camera_address"], config["socket_port"]))
 
 
 

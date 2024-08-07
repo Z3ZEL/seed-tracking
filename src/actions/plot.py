@@ -33,7 +33,7 @@ def plot_wrapper(plot_name : str):
             print("plotting", fig, ax)
             func(*args, fig=fig, ax=ax,**ka)
             if kwargs['plot'] and not kwargs['dry_run']:
-                plt.savefig(f"{config['master_camera']['temp_directory']}/{__plot_id}_{plot_name}.png")
+                plt.savefig(f"{config['main_camera']['temp_directory']}/{__plot_id}_{plot_name}.png")
     
         return inner
     return decorator
@@ -44,9 +44,9 @@ def show_plot():
         plt.show()
         
 
-def _plot_frame_with_timestamp(frames, timestamps, seed_timestamps, is_master=True):
+def _plot_frame_with_timestamp(frames, timestamps, seed_timestamps, is_main=True):
 
-    plt.scatter(frames,timestamps, color="cornflowerblue" if is_master else "navy", label="Frame")
+    plt.scatter(frames,timestamps, color="cornflowerblue" if is_main else "navy", label="Frame")
 
     seed_frame_timestamps = []
 
@@ -64,12 +64,12 @@ def _plot_frame_with_timestamp(frames, timestamps, seed_timestamps, is_master=Tr
     plt.axvline(x=index[0], color='r')
     plt.axvline(x=index[-1], color='r')
 
-    plt.scatter(index, seed_timestamps, color="red" if is_master else 'darkred', label="Seed founded")
+    plt.scatter(index, seed_timestamps, color="red" if is_main else 'darkred', label="Seed founded")
 
 @plot_wrapper("frame_sync")
 def plot_frame_with_timestamp(m_frames, m_timestamps, m_seed_timestamps, s_frames, s_timestamps, s_seed_timestamps, **kwargs):
-    _plot_frame_with_timestamp(m_frames, m_timestamps, m_seed_timestamps, is_master=True)
-    _plot_frame_with_timestamp(s_frames, s_timestamps, s_seed_timestamps, is_master=False)
+    _plot_frame_with_timestamp(m_frames, m_timestamps, m_seed_timestamps, is_main=True)
+    _plot_frame_with_timestamp(s_frames, s_timestamps, s_seed_timestamps, is_main=False)
     plt.xlabel("Frame number")
     plt.ylabel("Timestamp")
     plt.legend()

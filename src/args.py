@@ -53,6 +53,6 @@ def get_input_folder():
 def get_output_folder():
     return get_args_dict()["output"]
 
-def is_master():
+def is_main():
     return not(get_args_dict()["worker"])
 

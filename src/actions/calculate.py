@@ -205,15 +205,15 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     
     ## Save
     if not(kwargs["dry_run"]):
-        dir = config["master_camera"]["temp_directory"]
+        dir = config["main_camera"]["temp_directory"]
  
         
         for i, im in enumerate(m_saveIms):
             print('Saving', dir)
-            cv2.imwrite(os.path.join(config["master_camera"]["temp_directory"], f"m_result_{id}_{i}.jpg"), im)
+            cv2.imwrite(os.path.join(config["main_camera"]["temp_directory"], f"m_result_{id}_{i}.jpg"), im)
 
         for i, im in enumerate(s_saveIms):
-            cv2.imwrite(os.path.join(config['master_camera']["temp_directory"], f"s_result_{id}_{i}.jpg"), im)
+            cv2.imwrite(os.path.join(config['main_camera']["temp_directory"], f"s_result_{id}_{i}.jpg"), im)
 
 
     ## Plot 

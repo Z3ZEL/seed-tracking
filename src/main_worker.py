@@ -9,7 +9,7 @@ from actions.single_shot import shot as single_shot
 def main():
     # from actions.single_shot import shot
 
-    outputdir = CONFIG["slave_camera"]["temp_directory"]
+    outputdir = CONFIG["worker_camera"]["temp_directory"]
     while True:
         data, addr = SOCK.recvfrom(1024)
 
@@ -41,9 +41,9 @@ def main():
                 try:
                     multiple_shot(outputdir, start_timestamp, end_timestamp, prefix="s", suffix=number)
                 except Exception as e:
-                    SOCK.sendto(str(e).encode('utf-8'), (CONFIG['master_camera']['camera_address'], CONFIG['socket_port']))
+                    SOCK.sendto(str(e).encode('utf-8'), (CONFIG['main_camera']['camera_address'], CONFIG['socket_port']))
                     continue
-                res = SOCK.sendto("done".encode('utf-8'), (CONFIG['master_camera']['camera_address'], CONFIG['socket_port']))
+                res = SOCK.sendto("done".encode('utf-8'), (CONFIG['main_camera']['camera_address'], CONFIG['socket_port']))
                 print("Finished ")
 
 

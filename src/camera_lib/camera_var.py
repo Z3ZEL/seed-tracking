@@ -1,7 +1,7 @@
 import cv2 as cv
 import time, os
 from resource_manager import CONFIG,SOCK
-from args import is_master
+from args import is_main
 
 ## PROCESSOR ###
 from interfaces.image_processing import Processor
@@ -23,7 +23,7 @@ res = (int(res[0]), int(res[1]))
 framerate=camera_conf['framerate']
 
 
-FOLDER = CONFIG["master_camera"]["temp_directory"] if is_master() else CONFIG["slave_camera"]["temp_directory"]
+FOLDER = CONFIG["main_camera"]["temp_directory"] if is_main() else CONFIG["worker_camera"]["temp_directory"]
 CAMERA_LOG = os.path.join(FOLDER,"camera.log")
 PTS = os.path.join(FOLDER,"pts.txt")
 

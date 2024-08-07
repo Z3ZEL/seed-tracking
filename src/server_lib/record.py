@@ -1,11 +1,11 @@
 class Record:
-    def __init__(self, velocity : float, error_margin : float, plots : list[str], seed_images : list[str], master_seed_number : int, slave_seed_number : int, xz_gap : tuple[int], seed_id : str = None) -> None:
+    def __init__(self, velocity : float, error_margin : float, plots : list[str], seed_images : list[str], main_seed_number : int, worker_seed_number : int, xz_gap : tuple[int], seed_id : str = None) -> None:
         self._velocity : float = velocity
         self._error_margin : float = error_margin
         self._plots : list[str] = plots
         self._seed_images : list[str] = seed_images
-        self._master_seed_number : int = master_seed_number
-        self._slave_seed_number : int = slave_seed_number
+        self._main_seed_number : int = main_seed_number
+        self._worker_seed_number : int = worker_seed_number
         self._seed_id : str = seed_id
         self._xz_gap : tuple[int] = xz_gap
         self._validated : bool = False
@@ -18,8 +18,8 @@ class Record:
             "plots" : self._plots,
             "seed_images" : self._seed_images,
             "seed_id" : self._seed_id,
-            "slave_seed_number" : self._slave_seed_number,
-            "master_seed_number" : self._master_seed_number,
+            "worker_seed_number" : self._worker_seed_number,
+            "main_seed_number" : self._main_seed_number,
             "xz_gap" : self._xz_gap
         }
 

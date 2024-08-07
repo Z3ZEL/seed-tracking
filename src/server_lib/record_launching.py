@@ -55,7 +55,7 @@ class RecordLauncher(LoggerThread):
 
         try:
             send_shot(start_ts, end_ts, CONFIG, suffix=start_ts)
-            m_paths, s_paths, roi = shot(CONFIG["master_camera"]["temp_directory"], start_ts, end_ts, suffix=start_ts)
+            m_paths, s_paths, roi = shot(CONFIG["main_camera"]["temp_directory"], start_ts, end_ts, suffix=start_ts)
         except SystemExit:
             raise DeviceRecordException("An issue occured during recording please try again")
 
@@ -93,8 +93,8 @@ class RecordLauncher(LoggerThread):
         ## Fetch plot & image records
         print("Saving results ... ")
 
-        result_paths = glob.glob(os.path.join(CONFIG["master_camera"]["temp_directory"], "*_result_*.jpg"))
-        plot_paths = glob.glob(os.path.join(CONFIG["master_camera"]["temp_directory"], "plot*.png"))
+        result_paths = glob.glob(os.path.join(CONFIG["main_camera"]["temp_directory"], "*_result_*.jpg"))
+        plot_paths = glob.glob(os.path.join(CONFIG["main_camera"]["temp_directory"], "plot*.png"))
 
         plots = [self._memory_manager.save_img(self._session_id, cv.imread(path), f"plot{str(uuid.uuid4())}.png") for path, i in zip(plot_paths, range(len(plot_paths)))]
         results = [self._memory_manager.save_img(self._session_id, cv.imread(path), f"result{str(uuid.uuid4())}.png") for path, i in zip(result_paths, range(len(result_paths)))]

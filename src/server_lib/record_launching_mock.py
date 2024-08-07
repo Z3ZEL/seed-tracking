@@ -15,7 +15,7 @@ import cv2 as cv
 import numpy as np
 import os
 def clean(config):
-    folder = config["master_camera"]["temp_directory"]
+    folder = config["main_camera"]["temp_directory"]
     for filename in os.listdir(folder):
         if filename.endswith('.jpg') or filename.endswith('.png'):
             os.remove(os.path.join(folder, filename))
@@ -50,12 +50,12 @@ class RecordLauncher(LoggerThread):
 
         self._device.change_status(DeviceStatus.COMPUTING)
 
-        master_image_number = random.randrange(0,5)
-        slave_image_number = random.randrange(0,5)
+        main_image_number = random.randrange(0,5)
+        worker_image_number = random.randrange(0,5)
 
         xz_gap = (random.randrange(0,5), random.randrange(0,5))
 
-        if master_image_number == 0 and slave_image_number == 0:
+        if main_image_number == 0 and worker_image_number == 0:
             raise DeviceRecordException("No image found")
             
 
@@ -89,7 +89,7 @@ class RecordLauncher(LoggerThread):
 
 
 
-        record = Record(random.random() * 3, random.random() * 1, plots, seeds, master_image_number, slave_image_number,xz_gap, seed_id= self._seed_id)
+        record = Record(random.random() * 3, random.random() * 1, plots, seeds, main_image_number, worker_image_number,xz_gap, seed_id= self._seed_id)
         self._record_manager.add_record(self._session_id, record)
         print("record added")
         sleep(2)

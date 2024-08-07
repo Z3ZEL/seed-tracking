@@ -114,12 +114,12 @@ def stereo_camera_calibration(c1_images, c2_images, mtx1, dist1, mtx2, dist2, si
 def copy_image_array(arr):
     return [img.copy() for img in arr]
 
-def calibrate(master_camera_files:str, slave_camera_files:str, config:dict, dry_run:bool, plot:bool, flag:str):
+def calibrate(main_camera_files:str, worker_camera_files:str, config:dict, dry_run:bool, plot:bool, flag:str):
     stereo = "all" in flag or "stereo" in flag
     single = "all" in flag or "single" in flag
     
-    m_images_names = sorted(glob.glob(master_camera_files))
-    s_images_names = sorted(glob.glob(slave_camera_files))
+    m_images_names = sorted(glob.glob(main_camera_files))
+    s_images_names = sorted(glob.glob(worker_camera_files))
     m_images = []
     s_images = []
     if(len(s_images_names) != len(m_images_names)):

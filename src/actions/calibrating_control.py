@@ -14,10 +14,10 @@ def extract_matrix_and_dist(cam_data):
 m_mouseX,m_mouseY, s_mouseX, s_mouseY = 0,0,0,0
 m_mouse,s_mouse = False,False
 
-def get_mouse_coord(event, x, y, isMaster):
+def get_mouse_coord(event, x, y, ismain):
     if event == cv.EVENT_LBUTTONDOWN:
         global computed
-        if isMaster:
+        if ismain:
             global m_mouseX,m_mouseY, m_mouse
             m_mouseX,m_mouseY = x,y
             m_mouse = True
@@ -108,7 +108,7 @@ def calibrating_control(config: dict, realtime_testing):
 
         send_shot(target_timestamp, config, suffix = target_timestamp)        
         
-        m_path, s_path = shot(config["master_camera"]["temp_directory"],target_timestamp, suffix=target_timestamp)
+        m_path, s_path = shot(config["main_camera"]["temp_directory"],target_timestamp, suffix=target_timestamp)
 
         m_img = cv.imread(m_path)
         s_img = cv.imread(s_path)

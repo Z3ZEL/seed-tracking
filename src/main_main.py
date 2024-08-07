@@ -46,7 +46,7 @@ def main():
         print("SHOT TIME !")
 
         #Retrieve the current highest number
-        current = get_highest_number(config["master_camera"]["temp_directory"])
+        current = get_highest_number(config["main_camera"]["temp_directory"])
 
         
         current += 1
@@ -91,7 +91,7 @@ def main():
 
         send_shot(start_timestamp, end_timestamp, config, suffix=number)
 
-        m_paths, s_paths, roi = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
+        m_paths, s_paths, roi = shot(config["main_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
         m_paths = sorted(m_paths)
         s_paths = sorted(s_paths)
         if(kwargs['display']):
@@ -172,7 +172,7 @@ def main():
 
         send_shot(int(start_timestamp), int(end_timestamp), config, suffix=number)
 
-        m_paths, s_paths, roi = shot(config["master_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
+        m_paths, s_paths, roi = shot(config["main_camera"]["temp_directory"], start_timestamp, end_timestamp, suffix=number)
         
         #If the real range captured is inferior of 50% of the requested duration, then exit
         if roi[1] - roi[0] < 0.2 * duration * 1e9: 
