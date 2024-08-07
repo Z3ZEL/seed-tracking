@@ -15,6 +15,7 @@ false_str = ['false', '0', 'f', 'n', 'no', 'nope', 'nah', 'not really', 'no way'
 
 
 
+
 ## INIT FLASK
 
 app = Flask(__name__)
@@ -22,10 +23,42 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 app.logger.setLevel(logging.INFO)
 
+## CLEANING
+
+def on_startup():
+    ##Cleaning log file
+    import sys
+    args = sys.argv
+    error_logfile = None
+    access_logfile = None
+    #get index of '--error-logfile' in args
+    try:
+        index = args.index('--error-logfile')
+        #remove the next argument
+        error_logfile = args.pop(index+1)
+        print(f"Removing {error_logfile}")
+        #remove the argument itself
+        with open(error_logfile, 'w') as f:
+            f.write("")
+    except Exception:
+        pass
+
+    try:
+        index = args.index('--access-logfile')
+        access_logfile = args.pop(index+1)
+        print(f"Removing {access_logfile}")
+        args.pop(index)
+        with open(access_logfile, 'w') as f:
+            f.write("")
+    except Exception:
+        pass
+
 if CONFIG["production"]:
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers = gunicorn_logger.handlers
     app.logger.setLevel(gunicorn_logger.level)
+    on_startup()
+
 
 device = Device(app.logger)
 
