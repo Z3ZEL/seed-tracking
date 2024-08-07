@@ -7,6 +7,7 @@
   - [On a regular computer for development](#on-a-regular-computer-for-development)
   - [On the main RPI](#on-the-main-rpi)
   - [On the worker RPI](#on-the-worker-rpi)
+- [Deploy on production](#deploy-on-production)
 - [The CLI (Command Line Interface), for admin user](#the-cli-command-line-interface-for-admin-user)
 - [Development of the Seed Tracker](#development-of-the-seed-tracker)
   - [Improve The Seed Position Algorithm](#improve-the-seed-position-algorithm)
@@ -20,7 +21,7 @@
 This is the main repository for the Seed Tracker project. Which is an open source instrument for recording seed velocity dropped from a column. 
 
 # Getting Started
-  This guide will show you how to quickly install the repo on your Raspberry Pi.
+  This guide will show you how to quickly install the repo on your Raspberry Pi and starting to use it.
 
 
 ## Prerequisites
@@ -28,10 +29,17 @@ This is the main repository for the Seed Tracker project. Which is an open sourc
 
   To install the python environnment juste run the `install.sh` script. It will install all the required packages for the project. 
 
+
 ## On a regular computer for development
+  After you configure the `config.json` correctly (see [here](https://eng-git.canterbury.ac.nz/fgi18/seed-tracking/-/wikis/Quick-Start-(Using-the-Instrument)/The-config-file)). 
+
+  You'll be able to start the server as a development one, with mocked interfaces in order to develop the algorithms. 
+
 
 ## On the main RPI
+  After you configure the `config.json` correctly (see [here](https://eng-git.canterbury.ac.nz/fgi18/seed-tracking/-/wikis/Quick-Start-(Using-the-Instrument)/The-config-file)). 
 
+  If you have also started the worker server, you can start playing with the cli (see [CLI](# The CLI (Command Line Interface), for admin user))
 
 ## On the worker RPI
   After you configure the `config.json` correctly (see [here](https://eng-git.canterbury.ac.nz/fgi18/seed-tracking/-/wikis/Quick-Start-(Using-the-Instrument)/The-config-file)). 
@@ -47,7 +55,9 @@ This is the main repository for the Seed Tracker project. Which is an open sourc
   ```
 
 
-  
+# Deploy on production
+
+ > See the wiki [here](https://eng-git.canterbury.ac.nz/fgi18/seed-tracking/-/wikis/Quick-Start-(Building-the-instrument)/Production-setup)
 
 
 
