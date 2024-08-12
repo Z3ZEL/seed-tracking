@@ -7,7 +7,8 @@ from args import get_args_dict
 from resource_manager import CONFIG
 import logging
 from uuid import UUID
-import time
+import time, random
+import hashlib
 
 true_str = ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh']
 false_str = ['false', '0', 'f', 'n', 'no', 'nope', 'nah', 'not really', 'no way']
@@ -23,6 +24,8 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 app.logger.setLevel(logging.INFO)
 
+digit_password = random.randint(1000,9999)
+print(f"Password is {digit_password}")
 ## CLEANING
 
 def on_startup():
@@ -101,6 +104,15 @@ if get_args_dict()["dev"]:
 def get_uuid():
     return UUID(request.args.get("uuid")) if "uuid" in request.args else session.get("uuid")
 
+@app.route('/verify_password', methods = ['GET'])
+def verify_password():
+    print("TOKEN",request.headers.get("Authorization"))
+    password = request.headers.get("Authorization")
+    if hashlib.sha256(password.encode()).hexdigest() == hashlib.sha256(str(digit_password).encode()).hexdigest():
+        return "ok", 200
+    else:
+        return "Unauthorized", 401
+    
 
 @app.route('/status')
 def status():
