@@ -42,7 +42,8 @@ def on_startup():
         print(f"Removing {error_logfile}")
         #remove the argument itself
         with open(error_logfile, 'w') as f:
-            f.write("")
+            f.write(f"Starting server (password : {digit_password})\n")
+
     except Exception:
         pass
 
