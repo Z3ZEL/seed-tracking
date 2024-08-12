@@ -32,6 +32,8 @@ class RecordLauncher(LoggerThread):
         self._seed_id = seed_id
         self._kwargs = args.get_args_dict() | {"plot":True}
 
+        print(f"Init w/ duration {duration} and delay {delay}")
+
         ##clean the temp directory
         clean(CONFIG)
 

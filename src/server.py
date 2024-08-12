@@ -144,13 +144,10 @@ def stop():
 def start():
     uuid = get_uuid()
     print("Session ID " , uuid)
-    delay = request.args.get("delay")
-    try:
-        delay = int(delay) if delay != None else 2
-    except ValueError:
-        delay = 2
+    delay = request.args.get("delay", 2)
+    duration = request.args.get("duration", 6)
     seed_id = request.args.get("seed_id")
-    device.start_record(uuid, 6, delay = delay, seed_id = seed_id)
+    device.start_record(uuid, duration, delay = delay, seed_id = seed_id)
     return device.status(uuid).name
 
 @app.route('/abort')
