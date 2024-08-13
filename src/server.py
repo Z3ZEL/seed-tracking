@@ -9,6 +9,7 @@ import logging
 from uuid import UUID
 import time, random
 import hashlib
+from rpi_lib.rpi_interaction import print_lcd
 
 true_str = ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh']
 false_str = ['false', '0', 'f', 'n', 'no', 'nope', 'nah', 'not really', 'no way']
@@ -25,7 +26,7 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 app.logger.setLevel(logging.INFO)
 
 digit_password = random.randint(1000,9999)
-print(f"Password is {digit_password}")
+print_lcd(f"Password : {digit_password}")
 ## CLEANING
 
 def on_startup():

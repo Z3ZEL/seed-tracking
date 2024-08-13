@@ -12,3 +12,5 @@ def print_lcd(text:str):
     if lcd:
         lcd.text("Seed Eater V2.1", 1)
         lcd.text(text, 2)
+    else:
+        print(text)
