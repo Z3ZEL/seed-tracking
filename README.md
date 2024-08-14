@@ -14,6 +14,7 @@
   - [Improve the Data Cleaner Algorithm](#improve-the-data-cleaner-algorithm)
   - [Improve The Velocity Algorithm](#improve-the-velocity-algorithm)
   - [Testing your new algorithms](#testing-your-new-algorithms)
+- [Survival guide](#survival-guide)
 
 
 # Introduction
@@ -104,3 +105,5 @@ This is the main repository for the Seed Tracker project. Which is an open sourc
   ```bash
   ./test-bash
   ```
+
+# Survival guide

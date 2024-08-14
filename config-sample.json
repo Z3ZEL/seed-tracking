@@ -1,4 +1,6 @@
 {
+    "production": false,
+    "hardware" : "rpi5",
     "server" : {
         "port" : 3000,
         "host" : "localhost",

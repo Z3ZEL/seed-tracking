@@ -29,6 +29,23 @@ digit_password = random.randint(1000,9999)
 print_lcd(f"Password : {digit_password}")
 ## CLEANING
 
+def truncate_file(filepath, bytes):
+    '''
+        Open the file, and rewrite the content from the end up to bytes size
+    '''
+
+    with open(filepath, 'r+') as file:
+        file.seek(0, 2)
+        size = file.tell()
+        if size > bytes:
+            file.seek(size - bytes)
+            content = file.read()
+            file.seek(0)
+            file.write(content)
+            file.truncate()
+
+
+
 def on_startup():
     ##Cleaning log file
     import sys
@@ -40,21 +57,17 @@ def on_startup():
         index = args.index('--error-logfile')
         #remove the next argument
         error_logfile = args.pop(index+1)
-        print(f"Removing {error_logfile}")
+        print(f"Cleaning {error_logfile}")
         #remove the argument itself
-        with open(error_logfile, 'w') as f:
-            f.write(f"Starting server (password : {digit_password})\n")
+        truncate_file(error_logfile, 1024 * 1024 * 10) # 10 MB
 
     except Exception:
         pass
-
     try:
         index = args.index('--access-logfile')
         access_logfile = args.pop(index+1)
-        print(f"Removing {access_logfile}")
-        args.pop(index)
-        with open(access_logfile, 'w') as f:
-            f.write("")
+        print(f"Cleaning {access_logfile}")
+        truncate_file(access_logfile, 1024 * 1024 * 10) # 10 MB
     except Exception:
         pass
 
@@ -94,7 +107,7 @@ def handle_no_record(error):
 
 # Disabling cors if dev
 from flask_cors import CORS
-CORS(app, origins="*", allow_headers="*")
+CORS(app, origins="*", allow_headers="*",expose_headers=["Content-Disposition"])
 if get_args_dict()["dev"]:
 
 
@@ -179,7 +192,10 @@ def validate():
 @app.route('/export')
 def records():
     uuid = get_uuid()
-    return send_file(device.get_records_csv(uuid))
+    path = device.get_records_csv(uuid)
+    name = os.path.basename(path)
+    print(name)
+    return send_file(path, as_attachment=True, download_name=name,mimetype="text/csv")
 
 @app.route("/error")
 def error():
