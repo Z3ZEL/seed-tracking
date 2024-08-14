@@ -21,6 +21,8 @@ stages:          # List of stages for jobs, and their order of execution
 
 
 deploy_production:
+  tags:
+    - deploy
   stage: deploy
   script:
     - echo "$SSH_PRIVATE_KEY" > /tmp/id_rsa
