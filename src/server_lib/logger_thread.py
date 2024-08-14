@@ -3,7 +3,7 @@ if TYPE_CHECKING:
     from server_lib.device import Device
 import io,sys
 from threading import Thread
-from server_lib.device_exception import DeviceException
+from server_lib.device_exception import DeviceException, DeviceUserAbortException
 from server_lib.memory_manager import MemoryManager
 from args import get_args_dict
 from uuid import UUID   
@@ -22,6 +22,7 @@ class LoggerThread(Thread):
 
         self._original_stdout = sys.stdout
         self._stdout = io.StringIO() 
+        self._abort = False
 
     def logger(func):
         def wrapper(self : LoggerThread, *args, **kwargs):
@@ -41,9 +42,11 @@ class LoggerThread(Thread):
         return wrapper
     
 
+    def abort(self):
+        self._abort = True
 
-
-
-
+    def check_abort(self):
+        if self._abort:
+            raise DeviceUserAbortException()
 
     

@@ -67,7 +67,6 @@ class RecordLauncher(LoggerThread):
 
         self._m_paths = m_paths
         self._s_paths = s_paths
-        self._calculate()
 
     def _calculate(self):
         from server_lib.device import DeviceStatus
@@ -108,8 +107,9 @@ class RecordLauncher(LoggerThread):
     @LoggerThread.logger
     def run(self):  
         self._shooting_picture()
-        
-        
+        self.check_abort()
+        self._calculate()
+
             
 
         

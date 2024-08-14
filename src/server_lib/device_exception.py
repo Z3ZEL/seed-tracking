@@ -5,6 +5,7 @@ class DeviceError(enum.Enum):
     DEVICE_STATE_NOT_ALLOWED = 3
     NO_RECORD_FOUND = 4
     DEVICE_INTERNAL = -1
+    DEVICE_USER_ABORT = 7
 
     def __str__(self):
         return str(self.name)
@@ -18,7 +19,10 @@ class DeviceInternalException(DeviceException):
     def __init__(self, message):
         super(DeviceInternalException, self).__init__(message)
         self.error_code = -1
-
+class DeviceUserAbortException(DeviceException):
+    def __init__(self):
+        super(DeviceUserAbortException, self).__init__("User aborted the operation")
+        self.error_code = 7
 class DeviceBusyException(DeviceException):
     def __init__(self):
         super(DeviceBusyException, self).__init__("Device is busy, please try again later")

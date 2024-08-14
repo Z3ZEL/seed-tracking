@@ -43,7 +43,6 @@ class RecordLauncher(LoggerThread):
         print("shooting picture")
         self._device.change_status(DeviceStatus.RECORDING)
         sleep(2)
-        self._calculate()
 
     def _calculate(self):
         from server_lib.device import DeviceStatus
@@ -101,7 +100,10 @@ class RecordLauncher(LoggerThread):
     
     @LoggerThread.logger
     def run(self):
+        from server_lib.device import DeviceStatus
         self._shooting_picture()
+        self.check_abort()
+        self._calculate()
 
 
         

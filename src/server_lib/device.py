@@ -79,7 +79,6 @@ class Device:
             self._status = DeviceStatus.WAITING
 
     def raise_error(self, error : device_exception.DeviceException):
-        print(f"[ERROR] [{error.error_code}] {str(error)}")
         self._last_error = error
         self._status = DeviceStatus.ERROR
 
@@ -163,10 +162,7 @@ class Device:
         '''
             Stop the current job
         '''
-        self._current_job.join(timeout=0.001)
-        print(f"[DEVICE] Job stopped")
-        self._current_job = None
-        self.change_status(DeviceStatus.READY)
+        self._current_job.abort()
         return self.status(session_id).name
 
     @check_session
