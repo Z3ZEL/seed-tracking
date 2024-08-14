@@ -6,7 +6,7 @@ lcd = False
 if lcd_bus_address:
     #convert string "0x27" to hex 0x27
     address = int(lcd_bus_address, 16)
-    lcd = LCD(address=address, rows=2, cols=16)
+    lcd = LCD(address=address, rows=2, width=16)
 
 def print_lcd(text:str):
     if lcd:
