@@ -1,6 +1,7 @@
 from rpi_lcd import LCD
 from resource_manager import CONFIG
 import threading
+import psutil
 
 lcd_bus_address = CONFIG["lcd_screen_address"] if "lcd_screen_address" in CONFIG else False
 lcd = False
@@ -16,10 +17,8 @@ def print_lcd(text:str, line=2):
         print(text)
 def lcd_thread():
     while True:
-        print_lcd("Temp : " + str(psutil.sensors_temperatures()["cpu_thermal"][0].current) + " C", 1)
+        print_lcd("Temp : " + str(psutil.sensors_temperatures()["cpu_thermal"][0].current) + " C", line=1)
         threading.Event().wait(5)
 if lcd:
-    import psutil
     #create a thread to print something on the lcd screen every 5 seconds
-   
     threading.Thread(target=lcd_thread).start()
