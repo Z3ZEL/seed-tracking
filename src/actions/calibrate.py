@@ -122,6 +122,9 @@ def calibrate(main_camera_files:str, worker_camera_files:str, config:dict, dry_r
     s_images_names = sorted(glob.glob(worker_camera_files))
     m_images = []
     s_images = []
+    if len(m_images_names) == 0 or len(s_images_names) == 0:
+        print("No images found")
+        exit(1)
     if(len(s_images_names) != len(m_images_names)):
         print('There must be exact image name for both cameras')
         exit(1)
