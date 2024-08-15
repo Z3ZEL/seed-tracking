@@ -149,7 +149,7 @@ def calibrate(main_camera_files:str, worker_camera_files:str, config:dict, dry_r
     else:
         print("Loading camera matrixs and dists")
         from resource_manager import extract_matrix_and_dist, CONFIG
-        if not CONFIG["calibration_data"]:
+        if not "calibration_data" in CONFIG:
             print("! No camera configurations were found in the config file, have you run single camera calibration ?")
             exit(1)
         
