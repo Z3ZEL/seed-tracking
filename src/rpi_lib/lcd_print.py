@@ -16,7 +16,7 @@ def print_lcd(text:str, line=2):
         print(text)
 def lcd_thread():
     while True:
-        print_lcd("Temp : " + str(psutil.sensors_temperatures()["cpu-thermal"][0].current) + " C", 1)
+        print_lcd("Temp : " + str(psutil.sensors_temperatures()["cpu_thermal"][0].current) + " C", 1)
         threading.Event().wait(5)
 if lcd:
     import psutil
