@@ -161,8 +161,11 @@ def calibrate(main_camera_files:str, worker_camera_files:str, config:dict, dry_r
 
     if stereo:
         print("Starting stereo calibrating ...")
-        
-        ret,  mtx1, dist1, mtx2, dist2, R, T = stereo_camera_calibration(copy_image_array(m_images), copy_image_array(s_images), mtx1, dist1, mtx2, dist2, (rows,columns), config["square_size"], criteria, (5,5), plot)
+        try:
+            ret,  mtx1, dist1, mtx2, dist2, R, T = stereo_camera_calibration(copy_image_array(m_images), copy_image_array(s_images), mtx1, dist1, mtx2, dist2, (rows,columns), config["square_size"], criteria, (5,5), plot)
+        except Exception as e:
+            print("Error during stereo calibration : ", e)
+            exit(1)
         print("Stereo RMSE : ", ret)
 
     print("------ RESULT ------")
