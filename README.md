@@ -106,4 +106,4 @@ This is the main repository for the Seed Tracker project. Which is an open sourc
   ./test-bash
   ```
 
-# Survival guide
+# [Survival guide](https://eng-git.canterbury.ac.nz/fgi18/seed-tracking/-/wikis/Misc/Survival-Guide)
