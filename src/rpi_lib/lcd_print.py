@@ -10,10 +10,13 @@ if lcd_bus_address:
     address = int(lcd_bus_address, 16)
     lcd = LCD(address=address, rows=2, width=16)
 
-
+lines = ["", ""]
 def print_lcd(text:str, line:int=2):
+    global lines
+    lines[line-1] = text
     if lcd:
-        lcd.text(text, line)
+        lcd.text(lines[0], 1)
+        lcd.text(lines[1], 2)
     else:
         print(text)
 def lcd_thread():
