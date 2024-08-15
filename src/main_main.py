@@ -126,7 +126,7 @@ def main():
             print("Error : you must provide two directories to --input separated by comma, the first for the main camera , the second for the worker")
             exit(1)
         
-        calibrate(dirs[0], dirs[1], config["calibration"],kwargs["dry_run"], plot, kwargs['calibrate'])
+        calibrate(dirs[0], dirs[1], config["calibration"],kwargs["dry_run"], kwargs['display'], kwargs['calibrate'])
         exit(0)
 
     if(kwargs['check_calibrate']):
