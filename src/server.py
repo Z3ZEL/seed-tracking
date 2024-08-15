@@ -158,8 +158,8 @@ def stop():
 def start():
     uuid = get_uuid()
     print("Session ID " , uuid)
-    delay = request.args.get("delay", 2)
-    duration = request.args.get("duration", 6)
+    delay = request.args.get("delay", 2, type=int)
+    duration = request.args.get("duration", 6, type=int)
     seed_id = request.args.get("seed_id")
     device.start_record(uuid, duration, delay = delay, seed_id = seed_id)
     return device.status(uuid).name
