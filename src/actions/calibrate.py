@@ -204,35 +204,36 @@ def calibrate(main_camera_files:str, worker_camera_files:str, config:dict, dry_r
             config = json.load(file)
             has_calibration_data = "calibration_data" in config
             changed = False
-            if not has_calibration_data:
-                config["calibration_data"] = {}
-            else:
-                calibration_data = config["calibration_data"]
-                if calibration_data["m_cam"]["rmse"] > ret1:
-                    print("The main camera calibration is worst than the previous one")
-                if calibration_data["s_cam"]["rmse"] > ret2:
-                    print("The worker camera calibration is worst than the previous one")
+            if single:
+                if not has_calibration_data:
+                    config["calibration_data"] = {}
+                else:
+                    calibration_data = config["calibration_data"]
+                    if calibration_data["m_cam"]["rmse"] > ret1:
+                        print("The main camera calibration is worst than the previous one")
+                    if calibration_data["s_cam"]["rmse"] > ret2:
+                        print("The worker camera calibration is worst than the previous one")
 
 
-            user_input = input("Do you want to save intrinsic calibration data ? (y/n) : ")
-            if user_input != "y":
-                print("Intrinsic calibration data not saved")
-            else:
-                config["calibration_data"] = config["calibration_data"] | {
-                    "m_cam": {
-                        "mtx": mtx1.tolist(),
-                        "dist": dist1.tolist(),
-                        "rmse" : ret1
-                    },
-                    "s_cam": {
-                        "mtx": mtx2.tolist(),
-                        "dist": dist2.tolist(),
-                        "rmse": ret2
-                    },
-                    
-                }
-                print("Intrinsic calibration data saved !")
-                changed = True
+                user_input = input("Do you want to save intrinsic calibration data ? (y/n) : ")
+                if user_input != "y":
+                    print("Intrinsic calibration data not saved")
+                else:
+                    config["calibration_data"] = config["calibration_data"] | {
+                        "m_cam": {
+                            "mtx": mtx1.tolist(),
+                            "dist": dist1.tolist(),
+                            "rmse" : ret1
+                        },
+                        "s_cam": {
+                            "mtx": mtx2.tolist(),
+                            "dist": dist2.tolist(),
+                            "rmse": ret2
+                        },
+                        
+                    }
+                    print("Intrinsic calibration data saved !")
+                    changed = True
     
             if stereo:
                 if has_calibration_data and "stereo_rmse" in config:
