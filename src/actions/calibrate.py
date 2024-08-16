@@ -243,8 +243,8 @@ def calibrate(main_camera_files:str, worker_camera_files:str, config:dict, dry_r
                 if user_input != "y":
                     print("Stereo calibration data not saved")
                 else:
-                    config["calibration_data"]["R"] = R
-                    config["calibration_data"]["T"] = T
+                    config["calibration_data"]["R"] = R.tolist()
+                    config["calibration_data"]["T"] = T.tolist()
                     config["stereo_rmse"] = ret
                     print("Stereo calibration data saved !")
                     changed = True
