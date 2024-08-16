@@ -91,7 +91,7 @@ def calibrating_control(config: dict, realtime_testing):
         real_world_point = DLT(P1, P2, m_pos, s_pos)
         real_distance = np.linalg.norm(real_world_point)
 
-        print(f"Testing reference distance {dist}, computed : {real_distance} : {(real_distance/dist) * 100}%")
+        print(f"Testing reference distance {dist}, computed : {real_distance} : {round((real_distance - abs(real_distance - dist))/ real_distance , 3) * 100}%")
 
     print("-------------------------------")
 
