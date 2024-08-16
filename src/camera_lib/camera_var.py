@@ -18,6 +18,7 @@ SYSTEM_BOOTED = time.time_ns() - time.monotonic_ns()
 
 
 camera_conf = CONFIG["camera_setting"]
+focus_mode = camera_conf['focus_mode'] if 'focus_mode' in camera_conf else 'manual'
 res=tuple(camera_conf['resolution'].replace("(",'').replace(")",'').split(','))
 res = (int(res[0]), int(res[1]))
 framerate=camera_conf['framerate']
@@ -48,7 +49,7 @@ elif HARDWARE == "rpi3":
     #### RPI3 ####
 
 
-SHOT_CMD = lambda duration :  f"rpicam-vid --inline --autofocus-mode manual --autofocus-range macro -s --metadata - --level 4.2 --framerate {framerate} --width {res[0]} --height {res[1]} -o {VIDEO_PATH} --shutter {camera_conf['controls']['ExposureTime']} -t {duration}  -n" 
+SHOT_CMD = lambda duration :  f"rpicam-vid --inline --autofocus-mode {focus_mode} --autofocus-range macro -s --metadata - --level 4.2 --framerate {framerate} --width {res[0]} --height {res[1]} -o {VIDEO_PATH} --shutter {camera_conf['controls']['ExposureTime']} -t {duration}  -n" 
 EXTRACTOR_CMD = f"ffprobe {VIDEO_PATH} -hide_banner -select_streams v -show_entries frame | grep pts_time | cut -d '=' -f 2 > {PTS}"
 CONVERT_CMD = f"ffmpeg -i {VIDEO_PATH} {os.path.join(FOLDER, 'temp_%d.jpg')}"
 
