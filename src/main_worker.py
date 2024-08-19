@@ -1,6 +1,6 @@
 import time
 import glob,os
-import shutil
+from args import check_output_folder
 from resource_manager import CONFIG, SOCK
 
 from actions.multiple_shot import shot as multiple_shot
@@ -8,7 +8,7 @@ from actions.single_shot import shot as single_shot
 
 def main():
     # from actions.single_shot import shot
-
+    check_output_folder()
     outputdir = CONFIG["worker_camera"]["temp_directory"]
     while True:
         data, addr = SOCK.recvfrom(1024)

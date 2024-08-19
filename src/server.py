@@ -3,7 +3,7 @@ import os, time
 from werkzeug.exceptions import BadRequestKeyError
 from server_lib.device import Device, DeviceStatus
 import server_lib.device_exception
-from args import get_args_dict
+from args import get_args_dict, check_output_folder
 from resource_manager import CONFIG
 import logging
 from uuid import UUID
@@ -13,10 +13,9 @@ from rpi_lib.rpi_interaction import print_lcd
 
 true_str = ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh']
 false_str = ['false', '0', 'f', 'n', 'no', 'nope', 'nah', 'not really', 'no way']
-## INIT DEVICE
 
-
-
+# Create output folder if not created.
+check_output_folder()
 
 ## INIT FLASK
 

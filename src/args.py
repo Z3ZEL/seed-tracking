@@ -55,3 +55,11 @@ def get_output_folder():
 def is_main():
     return not(get_args_dict()["worker"])
 
+## Check output folder
+def check_output_folder():
+    import os
+    output = CONFIG["main_camera"]["temp_directory"] if is_main() else CONFIG["worker_camera"]["temp_directory"]
+    path = os.path.join(output)
+    os.makedirs(path, exist_ok=True)
+        
+    

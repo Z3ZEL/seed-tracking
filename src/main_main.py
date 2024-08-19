@@ -5,6 +5,7 @@ config = resource_manager.CONFIG
 from actions.plot import init_plot, show_plot
 
 
+
 def release_imgs(m_paths, s_paths):
     print("Removed imgs")
     resource_manager.delete_paths(m_paths)
@@ -31,6 +32,7 @@ def get_highest_number(directory):
 def main():
     kwargs = args.get_args_dict()
     print(kwargs)
+    args.check_output_folder()
     plot = kwargs["plot"]
     verbose = kwargs["verbose"]
     if verbose:

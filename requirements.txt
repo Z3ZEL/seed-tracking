@@ -6,4 +6,5 @@ flask
 flask-cors
 gunicorn
 gevent
-rpi-lcd
+psutil
+rpi-lcd; sys_platform == 'linux'
