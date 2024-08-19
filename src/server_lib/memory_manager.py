@@ -43,13 +43,22 @@ class MemoryManager:
         except FileNotFoundError:
             self._researchers = []
 
-    def push_researcher(self, researcher_id):
+    def push_researcher(self, researcher_id) -> bool:
+        """
+            Push a researcher id in the list of researchers
+
+            Returns:
+                bool: True if the researcher has been added, False otherwise
+
+        """
         if researcher_id in self._researchers:
-            return
+            return False
         self._researchers.append(researcher_id)
 
         with open(os.path.join(self.dir_path, "researchers.json"), "w") as file:
             file.write(json.dumps(self._researchers))
+
+        return True
 
     def clean_temp_dir(self):
         '''

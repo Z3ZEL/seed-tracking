@@ -215,8 +215,11 @@ def researcher():
         abort(400)
 
     if request.method == 'POST':
-        device.memory_manager.push_researcher(researcher_id)
-        return researcher_id
+        has_been_added = device.memory_manager.push_researcher(researcher_id)
+        if has_been_added:
+            return "ok", 200
+        else:
+            return "Researcher already added", 403
     else:
         return researcher_id in device.memory_manager.researchers
 
