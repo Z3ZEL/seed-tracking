@@ -238,6 +238,10 @@ def get_image(session_id, filename):
         # Return a 404 error if the file is not found
         abort(404)
 
+@app.route("/shutdown")
+def turn_off():
+    app.logger.info("Turning off by user")
+    os.system("sudo shutdown -r now")
     
 app.logger.info("Server started")
 

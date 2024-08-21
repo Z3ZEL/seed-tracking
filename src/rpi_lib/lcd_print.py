@@ -19,13 +19,21 @@ def print_lcd(text:str, line:int=2):
         lcd.text(lines[1], 2)
     else:
         print(text)
+
+
 def lcd_thread():
-    while True:
-        string = "Temp : " + str(psutil.sensors_temperatures()["cpu_thermal"][0].current) + " C"
-        #truncate to 16 characters
-        string = string[:16]
-        print_lcd(string , line=1)
-        time.sleep(5)
+    try:
+        while True:
+            string = "Temp : " + str(psutil.sensors_temperatures()["cpu_thermal"][0].current) + " C"
+            #truncate to 16 characters
+            string = string[:16]
+            print_lcd(string , line=1)
+            time.sleep(5)
+    except SystemExit:
+        print("Exiting...")
 if lcd:
     #create a thread to print something on the lcd screen every 5 seconds
-    threading.Thread(target=lcd_thread).start()
+    thread = threading.Thread(target=lcd_thread).start()
+
+
+
