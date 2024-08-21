@@ -2,6 +2,7 @@ from rpi_lcd import LCD
 from resource_manager import CONFIG
 import threading
 import psutil, time
+import atexit
 
 lcd_bus_address = CONFIG["lcd_screen_address"] if "lcd_screen_address" in CONFIG else False
 lcd = False
@@ -22,18 +23,18 @@ def print_lcd(text:str, line:int=2):
 
 
 def lcd_thread():
-    try:
-        while True:
-            string = "Temp : " + str(psutil.sensors_temperatures()["cpu_thermal"][0].current) + " C"
-            #truncate to 16 characters
-            string = string[:16]
-            print_lcd(string , line=1)
-            time.sleep(5)
-    except SystemExit:
-        print("Exiting...")
+    while True:
+        string = "Temp : " + str(psutil.sensors_temperatures()["cpu_thermal"][0].current) + " C"
+        #truncate to 16 characters
+        string = string[:16]
+        print_lcd(string , line=1)
+        time.sleep(5)
 if lcd:
     #create a thread to print something on the lcd screen every 5 seconds
-    thread = threading.Thread(target=lcd_thread).start()
+    thread : threading.Thread = threading.Thread(target=lcd_thread).start()
+    @atexit.register
+    def exit_handler():
+        thread.join(timeout=1)
 
 
 
