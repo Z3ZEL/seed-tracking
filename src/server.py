@@ -241,7 +241,7 @@ def get_image(session_id, filename):
 @app.route("/shutdown")
 def turn_off():
     app.logger.info("Turning off by user")
-    os.system(f"ssh ${CONFIG["worker_camera"]["camera_host"]}@${CONFIG['worker_camera']['camera_address']} \'sudo shutdown now\'")
+    os.system(f"ssh ${CONFIG['worker_camera']['camera_host']}@${CONFIG['worker_camera']['camera_address']} 'sudo shutdown now'")
     os.system("sudo shutdown now")
     
 app.logger.info("Server started")
