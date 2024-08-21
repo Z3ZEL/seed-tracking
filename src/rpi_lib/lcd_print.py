@@ -32,7 +32,7 @@ def lcd_thread():
 if lcd:
     #create a thread to print something on the lcd screen every 5 seconds
     thread : threading.Thread = threading.Thread(target=lcd_thread)
-    thread.run()
+    thread.start()
     @atexit.register
     def exit_handler():
         thread.join(timeout=1)
