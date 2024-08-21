@@ -158,7 +158,7 @@ class Device:
     @check_session
     @check_current_session
     @check_status(DeviceStatus.COMPUTING, DeviceStatus.RECORDING)
-    def stop_job(self, session_id: UUID):
+    def stop_record(self, session_id: UUID):
         '''
             Stop the current job
         '''

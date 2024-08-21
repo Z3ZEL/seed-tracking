@@ -166,7 +166,7 @@ def start():
 @app.route('/abort')
 def abort():
     uuid = get_uuid()
-    return device.stop_job(uuid)
+    return device.stop_record(uuid)
 
 
 @app.route('/last_record')
@@ -241,8 +241,13 @@ def get_image(session_id, filename):
 @app.route("/shutdown")
 def turn_off():
     app.logger.info("Turning off by user")
-    os.system(f"ssh ${CONFIG['worker_camera']['camera_host']}@${CONFIG['worker_camera']['camera_address']} 'sudo shutdown now'")
-    os.system("sudo shutdown now")
+    if get_args_dict()["dev"]:
+        print("Turning off")
+        return "ok", 200
+    else:
+        os.system(f"ssh ${CONFIG['worker_camera']['camera_host']}@${CONFIG['worker_camera']['camera_address']} 'sudo shutdown now'")
+        os.system("sudo shutdown now")
+        return "ok", 200
     
 app.logger.info("Server started")
 

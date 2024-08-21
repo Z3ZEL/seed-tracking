@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 class ProcessingLayer:
     def __init__(self, **kwargs):
-        self.show = False if 'show' not in kwargs else kwargs['show']
+        self.show = False if 'show' not in kwargs else kwargs['display']
         self.duration = 500 if 'duration' not in kwargs else kwargs['duration']
     def transform(self, image : np.array) -> np.ndarray:
         pass
