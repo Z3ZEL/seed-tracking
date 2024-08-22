@@ -245,8 +245,12 @@ def turn_off():
         print("Turning off")
         return "ok", 200
     else:
-        os.system(f"ssh ${CONFIG['worker_camera']['camera_host']}@${CONFIG['worker_camera']['camera_address']} 'sudo shutdown now'")
+        send_cmd = f"ssh ${CONFIG['worker_camera']['camera_host']}@${CONFIG['worker_camera']['camera_address']} 'sudo shutdown now'"
+        app.logger.info(f"Sending command {send_cmd}")
+        app.logger.info("Shutdown triggered by user")
+        os.system(send_cmd)
         os.system("sudo shutdown now")
+        
         return "ok", 200
     
 app.logger.info("Server started")
