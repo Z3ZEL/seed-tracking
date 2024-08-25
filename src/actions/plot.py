@@ -23,6 +23,13 @@ def init_plot(plot_id : str):
 
 
 def plot_wrapper(plot_name : str):
+    """
+    A decorator to register a function as a plotting function, 
+    it automatically saves the plot to a file and create the fig for you.
+    Parameters:
+        plot_name (str): The name of the plot.
+
+    """
     global __plot_id
     def decorator(func):
         def inner(*args, **ka):
@@ -66,8 +73,26 @@ def _plot_frame_with_timestamp(frames, timestamps, seed_timestamps, is_main=True
 
     plt.scatter(index, seed_timestamps, color="red" if is_main else 'darkred', label="Seed founded")
 
+### ALL REGISTERED PLOTS ###
+
+
 @plot_wrapper("frame_sync")
 def plot_frame_with_timestamp(m_frames, m_timestamps, m_seed_timestamps, s_frames, s_timestamps, s_seed_timestamps, **kwargs):
+    """
+    Plot frames with timestamps for main and secondary data.
+
+    Args:
+        m_frames (list): List of main frames.
+        m_timestamps (list): List of main timestamps.
+        m_seed_timestamps (list): List of main seed timestamps.
+        s_frames (list): List of secondary frames.
+        s_timestamps (list): List of secondary timestamps.
+        s_seed_timestamps (list): List of secondary seed timestamps.
+        **kwargs: Additional keyword arguments.
+
+    Returns:
+        None
+    """
     _plot_frame_with_timestamp(m_frames, m_timestamps, m_seed_timestamps, is_main=True)
     _plot_frame_with_timestamp(s_frames, s_timestamps, s_seed_timestamps, is_main=False)
     plt.xlabel("Frame number")
@@ -76,6 +101,17 @@ def plot_frame_with_timestamp(m_frames, m_timestamps, m_seed_timestamps, s_frame
 
 @plot_wrapper("seed_position")
 def plot_seed_positions(m_computed, s_computed, **kwargs):
+    """
+    Plot the computed Y positions of seeds over time.
+    Args:
+        m_computed (list): List of tuples containing computed seed positions for main seeds.
+                           Each tuple should have the format (x, y, z, timestamp).
+        s_computed (list): List of tuples containing computed seed positions for secondary seeds.
+                           Each tuple should have the format (x, y, z, timestamp).
+        **kwargs: Additional keyword arguments to be passed to the plot function.
+    Returns:
+        None
+    """
     m_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in m_computed]
     s_computed_plot = [(datetime.fromtimestamp(ts / 1e9), y) for x,y,z,ts in s_computed]
     
@@ -103,6 +139,17 @@ def plot_seed_positions(m_computed, s_computed, **kwargs):
 
 @plot_wrapper("seed_position_mean")
 def plot_mean_x(m_savePos, s_savePos, m_x_mean, s_x_mean, **kwargs):
+    """
+    Plot the mean x position of main and worker cameras.
+    Parameters:
+    - m_savePos (list): List of tuples containing the x and y positions of the main camera.
+    - s_savePos (list): List of tuples containing the x and y positions of the worker camera.
+    - m_x_mean (float): Mean x position of the main camera.
+    - s_x_mean (float): Mean x position of the worker camera.
+    - **kwargs: Additional keyword arguments.
+    Returns:
+    None
+    """
 
     m_pos = np.array([pos for pos, ts in m_savePos])
     s_pos = np.array([pos for pos, ts in s_savePos])
@@ -122,6 +169,21 @@ def plot_mean_x(m_savePos, s_savePos, m_x_mean, s_x_mean, **kwargs):
     
 @plot_wrapper("velocity")
 def plot_velocity_line(m_X, m_y, s_X, s_y, m_ransac, s_ransac, fig=None, ax=None, **kwargs):            
+    """
+    Plot the velocity line for two sets of data points along with their RANSAC regressors.
+    Parameters:
+    - m_X (numpy array): Array of UNIX timestamps for the first set of data points.
+    - m_y (numpy array): Array of y-values for the first set of data points.
+    - s_X (numpy array): Array of UNIX timestamps for the second set of data points.
+    - s_y (numpy array): Array of y-values for the second set of data points.
+    - m_ransac (RANSACRegressor): RANSAC regressor for the first set of data points.
+    - s_ransac (RANSACRegressor): RANSAC regressor for the second set of data points.
+    - fig (matplotlib Figure, optional): Figure object to plot on. If not provided, a new figure will be created.
+    - ax (matplotlib Axes, optional): Axes object to plot on. If not provided, a new axes will be created.
+    - **kwargs: Additional keyword arguments to pass to the plotting functions.
+    Returns:
+    - None
+    """
     # Assuming m_X and s_X are numpy arrays of UNIX timestamps
     m_X_dates = [datetime.utcfromtimestamp(ts/1e9) for ts in m_X.flatten()]
     s_X_dates = [datetime.utcfromtimestamp(ts/1e9) for ts in s_X.flatten()]
@@ -152,3 +214,6 @@ def plot_velocity_line(m_X, m_y, s_X, s_y, m_ransac, s_ransac, fig=None, ax=None
     ax.set_xlabel('Time (ns)')
     ax.set_ylabel('Y (cm, from main origin)')
     ax.legend(loc='lower right')
+
+
+### END OF REGISTERED PLOTS ###

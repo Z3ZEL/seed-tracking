@@ -3,6 +3,10 @@ from interfaces.image_processing import Optimizer, Processor
 import numpy as np
 
 class SmoothOptimizer(Optimizer):
+    '''
+        This optimizer is used to pre train the precessor by feeding it with the mean image of the dataset. 
+        You can specify the number of iteration and the kernel size of the blur layer.
+    '''
     def __init__(self, image_set : list[np.array], iteration : int = 1, **kwargs):
         self.image_set = image_set
         self.iteration = iteration

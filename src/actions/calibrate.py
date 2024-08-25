@@ -6,10 +6,22 @@ import numpy as np
 
 
 def single_camera_calibration(images, image_names, size, square_size, criteria, conv_size, plot):
- ## Parse checkerboard_size
- 
-    #criteria used by checkerboard pattern detector.
-    #Change this if the code can't find the checkerboard
+    """
+    Perform single camera calibration using a set of images of a checkerboard pattern.
+    Parameters:
+    - images (list): List of images containing the checkerboard pattern.
+    - image_names (list): List of names corresponding to each image.
+    - size (tuple): Tuple specifying the number of rows and columns in the checkerboard pattern.
+    - square_size (float): Size of each square in the checkerboard pattern.
+    - criteria (tuple): Criteria for corner refinement.
+    - conv_size (tuple): Size of the convolution window for corner refinement.
+    - plot (bool): Flag indicating whether to display the images with the detected checkerboard pattern.
+    Returns:
+    - ret (bool): Flag indicating the success of the calibration process.
+    - mtx (ndarray): Camera matrix containing the intrinsic parameters.
+    - dist (ndarray): Distortion coefficients.
+    """
+    
  
     rows,columns = size
  
@@ -56,6 +68,32 @@ def single_camera_calibration(images, image_names, size, square_size, criteria, 
     return ret, mtx, dist
 
 def stereo_camera_calibration(c1_images, c2_images, mtx1, dist1, mtx2, dist2, size, square_size, criteria, conv_size, plot):
+    """
+    Perform stereo camera calibration using a pair of stereo images.
+    Args:
+        c1_images (List[np.ndarray]): List of left camera images.
+        c2_images (List[np.ndarray]): List of right camera images.
+        mtx1 (np.ndarray): Camera matrix of left camera.
+        dist1 (np.ndarray): Distortion coefficients of left camera.
+        mtx2 (np.ndarray): Camera matrix of right camera.
+        dist2 (np.ndarray): Distortion coefficients of right camera.
+        size (Tuple[int, int]): Number of rows and columns of the checkerboard.
+        square_size (float): Size of each square in the checkerboard.
+        criteria (Tuple[int, float]): Criteria for corner refinement.
+        conv_size (Tuple[int, int]): Half size of the search window for corner refinement.
+        plot (bool): Flag to indicate whether to display the images with detected corners.
+    Returns:
+        Tuple: A tuple containing the following calibration parameters:
+            - ret (float): Calibration error.
+            - CM1 (np.ndarray): Camera matrix of left camera after calibration.
+            - dist1 (np.ndarray): Distortion coefficients of left camera after calibration.
+            - CM2 (np.ndarray): Camera matrix of right camera after calibration.
+            - dist2 (np.ndarray): Distortion coefficients of right camera after calibration.
+            - R (np.ndarray): Rotation matrix between the two cameras.
+            - T (np.ndarray): Translation vector between the two cameras.
+    """
+    # Implementation goes here
+    pass
     rows, columns = size 
     world_scaling = square_size
     
@@ -115,6 +153,21 @@ def copy_image_array(arr):
     return [img.copy() for img in arr]
 
 def calibrate(main_camera_files:str, worker_camera_files:str, config:dict, dry_run:bool, plot:bool, flag:str):
+    """
+    Calibrates the main and worker cameras using the given image files and configuration.
+    Args:
+        main_camera_files (str): The file path pattern for the main camera images.
+        worker_camera_files (str): The file path pattern for the worker camera images.
+        config (dict): The configuration dictionary containing calibration parameters.
+        dry_run (bool): If True, the calibration is not saved.
+        plot (bool): If True, displays plots during calibration.
+        flag (str): The calibration flag indicating which cameras to calibrate.
+    Returns:
+        None
+
+    Raises:
+        SystemExit: If no images are found or if the image names do not match or any other error
+    """
     stereo = "all" in flag or "stereo" in flag
     single = "all" in flag or "single" in flag
     

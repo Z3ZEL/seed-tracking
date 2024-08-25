@@ -11,6 +11,14 @@ import time, random
 import hashlib
 from rpi_lib.rpi_interaction import print_lcd
 
+"""
+    The server is the main entry point of the application. It is used to manage the communication between the device and the client.
+    The server is a Flask server that is used to manage the different endpoints of the application.
+    All the logic of the application is managed by the device object.
+    The server has to use the device and not importing directly actions module.
+"""
+
+
 true_str = ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh']
 false_str = ['false', '0', 'f', 'n', 'no', 'nope', 'nah', 'not really', 'no way']
 

@@ -1,8 +1,5 @@
 from args import is_main
-
-def build_server():
-    from server import app
-    return app
+### Route the main function to the right file
 
 
 if is_main():

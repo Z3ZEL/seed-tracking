@@ -17,12 +17,6 @@ def print_extra(*args):
     out = " ".join([str(arg) for arg in args])
     print(f"{out} - {psutil.cpu_percent()}%")
 
-def cool_down():
-    pass
-    # while psutil.cpu_percent() > 90:
-    #     print("Cooling down")
-    #     time.sleep(1)
-
 
 def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     '''
@@ -76,9 +70,9 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
     s_preprocessor = Processor([UndistortLayer(mtx2, dist2)])
 
     m_imgs = [m_preprocessor.process(im) for im in m_imgs]
-    cool_down()
+    
     s_imgs = [s_preprocessor.process(im) for im in s_imgs]
-    cool_down()
+    
 
     
     #Apply the optimizers
@@ -87,14 +81,14 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
         SmoothOptimizer(image_set = m_imgs, iteration=2, kernel_size=5)
     ]).apply(m_background_substractor)
 
-    cool_down()
+    
 
     print_extra("Optimizing worker...")
     OptimizerApplier([
         SmoothOptimizer(image_set = s_imgs, iteration=2, kernel_size=5)
     ]).apply(s_background_substractor)
 
-    cool_down()
+    
     print_extra("Processing main images...")
     m_saveIms = []
     m_savePos = []
@@ -118,7 +112,7 @@ def calculate_real_world_position(m_paths, s_paths, config, **kwargs):
             out = cv2.hconcat([im, out])
             m_saveIms.append(out)
 
-    cool_down()
+    
 
     print_extra(f"Found {len(m_saveIms)} seeds for main")
 

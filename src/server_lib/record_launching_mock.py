@@ -14,6 +14,10 @@ import random
 import cv2 as cv
 import numpy as np
 import os
+### MOCKING FILE FOR DEVELOPMENT PURPOSES
+
+
+
 def clean(config):
     folder = config["main_camera"]["temp_directory"]
     for filename in os.listdir(folder):

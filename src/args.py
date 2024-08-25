@@ -1,5 +1,6 @@
 from resource_manager import CONFIG
 
+### CLI ARGS
 
 if not(CONFIG["production"]):
     import argparse

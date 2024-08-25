@@ -1,3 +1,3 @@
-from interfaces.image_processing.processing_pipeline import ProcessingLayer as ProcessingLayer
+from interfaces.image_processing.processing_layer import ProcessingLayer as ProcessingLayer
 from interfaces.image_processing.processor import Processor as Processor
 from interfaces.image_processing.optimizer import Optimizer as Optimizer

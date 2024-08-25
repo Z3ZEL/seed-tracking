@@ -8,19 +8,24 @@ from camera_lib.camera import PROCESSOR, FOLDER as folder, launch, CAMERA_LOG
 from rpi_lib.rpi_interaction import turn_light
 
 
-def trunc_json(json):
-    last = json.rfind('}')
-    
-    # Si le caractère '}' est trouvé, tronquer la chaîne et ajouter ']'
-    if last != -1:
-        json_formated = json[:last + 1] + ']'
-        return json_formated
-    else:
-        # Si '}' n'est pas trouvé, retourner la chaîne originale sans modification
-        return json_formated
-
 
 def fetch_shot(config, number):
+    """
+    Fetches a shot from the worker camera and returns the path to the image.
+
+    Args:
+        config (dict): Configuration settings.
+        number (int): The shot number.
+
+    Returns:
+        list: A list of paths to the fetched image(s).
+
+    Raises:
+        SystemExit: If the image(s) cannot be found.
+
+    """
+    # Code implementation goes here
+    pass
     with open(CAMERA_LOG, "a+") as file:
         proc = subprocess.Popen(f'scp {config["worker_camera"]["camera_host"]}@{config["worker_camera"]["camera_address"]}:{config["worker_camera"]["temp_directory"]}/s_img_* {config["main_camera"]["temp_directory"]}'.split(" "), stdout=file, stderr=file)
         proc.wait()
@@ -181,6 +186,18 @@ def shot(outputfolder, start_timestamp, end_timestamp, prefix="m", suffix="0"):
 
 
 def send_shot(start_timestamp, end_timestamp, config, suffix=""):
+    """
+    Sends a shot message to a worker camera.
+
+    Args:
+        start_timestamp (int): The start timestamp of the shot.
+        end_timestamp (int): The end timestamp of the shot.
+        config (dict): The configuration settings.
+        suffix (str, optional): The suffix for the shot message. Defaults to "".
+
+    Returns:
+        None
+    """
     message = ("multiple" + ":" + str(start_timestamp) + ":" + str(end_timestamp) + ":" + str(suffix)).encode('utf-8')
     sock.sendto(message, (config["worker_camera"]["camera_address"], config["socket_port"]))
 

@@ -1,12 +1,12 @@
 import numpy as np
 import cv2 as cv
-import socket
 import time
 import os, random
 from scipy import linalg
 
 from interfaces.image_processing import Processor
-from common_layers import RotationLayer, ResizeLayer, UndistortLayer
+from computations.triangulate_position import TriangulatePosition
+from common_layers import UndistortLayer
 
 def extract_matrix_and_dist(cam_data):
     return np.array(cam_data["mtx"]), np.array(cam_data["dist"])
@@ -26,30 +26,17 @@ def get_mouse_coord(event, x, y, ismain):
             s_mouseX,s_mouseY = x,y
             s_mouse = True
 
-def DLT(P1, P2, point1, point2):
- 
-    A = [point1[1]*P1[2,:] - P1[1,:],
-         P1[0,:] - point1[0]*P1[2,:],
-         point2[1]*P2[2,:] - P2[1,:],
-         P2[0,:] - point2[0]*P2[2,:]
-        ]
-    A = np.array(A).reshape((4,4))
-    #print('A: ')
-    #print(A)
- 
-    B = A.transpose() @ A
-    U, s, Vh = linalg.svd(B, full_matrices = False)
- 
-    # print('Triangulated point: ')
-    # print(Vh[3,0:3]/Vh[3,3])
-    return Vh[3,0:3]/Vh[3,3]
-    
-
-
-
-
 def calibrating_control(config: dict, realtime_testing):
-    print("Calibrating control tool")
+    """
+    Launch calibrating control tool.
+    Args:
+        config (dict): Configuration data.
+        realtime_testing (bool): Flag indicating if real-time testing is enabled.
+    Returns:
+        None
+    """
+    
+    print(">> Calibrating control tool")
     if realtime_testing:
         print(" > You can click on the image to get the computed distance from the main camera")
         print(" > Pressing the ESC key will shot a picture")
@@ -88,7 +75,7 @@ def calibrating_control(config: dict, realtime_testing):
 
         dist = ref["distance"]
 
-        real_world_point = DLT(P1, P2, m_pos, s_pos)
+        real_world_point =  TriangulatePosition.DLT(P1, P2, m_pos, s_pos)
         real_distance = np.linalg.norm(real_world_point)
 
         print(f"Testing reference distance {dist}, computed : {real_distance} : {round((real_distance - abs(real_distance - dist))/ real_distance , 3) * 100}%")
@@ -155,7 +142,7 @@ def calibrating_control(config: dict, realtime_testing):
                     color = random_color()
 
                     ## Compute position here
-                    real_world_point = DLT(P1, P2, (m_mouseX, m_mouseY), (s_mouseX, s_mouseY))
+                    real_world_point = TriangulatePosition.DLT(P1, P2, (m_mouseX, m_mouseY), (s_mouseX, s_mouseY))
 
                     print("Computed result : ")
                     print("main Camera image point : ", (m_mouseX, m_mouseY))

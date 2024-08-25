@@ -10,19 +10,22 @@ from camera_lib.camera import PROCESSOR,FOLDER,VIDEO_PATH, launch
 from rpi_lib.rpi_interaction import turn_light
 
 
-def trunc_json(json):
-    last = json.rfind('}')
-    
-    # Si le caractère '}' est trouvé, tronquer la chaîne et ajouter ']'
-    if last != -1:
-        json_formated = json[:last + 1] + ']'
-        return json_formated
-    else:
-        # Si '}' n'est pas trouvé, retourner la chaîne originale sans modification
-        return json_formated
-
 
 def fetch_shot(config, number):
+    """
+    Fetches a shot from the worker camera and returns the path to the image.
+
+    Args:
+        config (dict): Configuration settings.
+        number (int): The shot number.
+
+    Returns:
+        str: The path to the fetched image.
+
+    Raises:
+        SystemExit: If the image cannot be found.
+
+    """
     proc = os.system(f'scp {config["worker_camera"]["camera_host"]}@{config["worker_camera"]["camera_address"]}:{config["worker_camera"]["temp_directory"]}/s_* {config["main_camera"]["temp_directory"]}')
     file = os.path.join(config["main_camera"]["temp_directory"],f"s_*_{number}.jpg")
     path = glob.glob(file)
@@ -34,6 +37,16 @@ def fetch_shot(config, number):
 
 
 def shot(outputfolder, start_timestamp, prefix="m", suffix=""):
+    """
+    Perform a single shot recording.
+    Args:
+        outputfolder (str): The path to the output folder.
+        start_timestamp (float): The start timestamp for the recording.
+        prefix (str, optional): The prefix for the image filename. Defaults to "m".
+        suffix (str, optional): The suffix for the image filename. Defaults to "".
+    Returns:
+        tuple: A tuple containing the path to the saved image and the path to the shot file.
+    """
     outputfolder = FOLDER
     duration = 0.5
     print("Recording for", duration, " seconds")
@@ -96,6 +109,14 @@ def shot(outputfolder, start_timestamp, prefix="m", suffix=""):
 
 
 def send_shot(target_timestamp, config, suffix=""):
+    """
+    Sends a single shot message to the specified camera address and socket port.
+
+    Args:
+        target_timestamp (int): The target timestamp for the shot.
+        config (dict): The configuration dictionary containing the camera address and socket port.
+        suffix (str, optional): The suffix to be appended to the message. Defaults to "".
+    """
     message = ("single" + ":" + str(target_timestamp) + ":" + str(suffix)).encode('utf-8')
     sock.sendto(message, (config["worker_camera"]["camera_address"], config["socket_port"]))
 

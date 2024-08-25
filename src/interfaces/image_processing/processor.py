@@ -1,4 +1,4 @@
-import interfaces.image_processing.processing_pipeline as pp
+import interfaces.image_processing.processing_layer as pp
 import numpy as np
 class Processor:
     def __init__(self, layers : list[pp.ProcessingLayer]):

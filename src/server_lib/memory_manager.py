@@ -101,27 +101,12 @@ class MemoryManager:
         '''
             Log the output of the record
         '''
-        # path = os.path.join(self.dir_path, 'logs')
-        # path = os.path.join(path, f'{str(session_id)}_{time.strftime("%Y-%m-%d")}.txt')
-
-        # with open(path, "a+") as file:
-        #     file.write("###### {time} ######\n".format(time = time.strftime("%H:%M:%S")))
-        #     file.write(logs)
-        #     if exception:
-        #         file.write(f"[ERROR] [{str(exception.error_code)}] {str(exception)}\n")
         output = "\n###### [{session_id}] [{time}] ######\n".format(session_id = str(session_id),time = time.strftime("%H:%M:%S"))
         output += logs
         if exception:
             output += f"[ERROR] [{str(exception.error_code)}] {str(exception)}\n"
         output += "###################\n"
         self.logger.info(output)
-
-
-
-
-        
-
-
     def release_session(self, session_id : str):
         '''
             Remove a session directory

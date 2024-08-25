@@ -6,6 +6,37 @@ import args
 import numpy as np
 
 
+"""
+    The test script is used to test algotithms performances.
+    It uses test cases stored in the test folder.
+
+    In the folder, you can add as much as you want zip files containing the following structure:
+
+    - test
+        - test.zip
+            - m_0_1000000000.jpg
+            - m_1_1000000000.jpg
+            - ...
+            - s_0_1000000000.jpg
+            - s_1_1000000000.jpg
+            - ...
+            - test -> "m:10,s:10,v:0.5"
+
+            
+    All images are named with the following pattern : {m/s}_{index}_{timestamp}.jpg the timestamp has to be in nanoseconds, note that
+    you can use directly the images from the ouput of mutliple shot command from the CLI
+
+    The test file contains the following information : m:10,s:10,v:0.5
+    m: number of main seeds
+    s: number of worker seeds
+    v: expected velocity
+
+    You can set v to -1 if you don't know the real velocity of the seeds. It will ignore
+
+    You can add your own test case by adding new parameters to the test file.
+
+"""
+
 print("########## SEED TRACKING TEST ##########")
 
 

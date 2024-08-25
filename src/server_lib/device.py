@@ -160,7 +160,7 @@ class Device:
     @check_status(DeviceStatus.COMPUTING, DeviceStatus.RECORDING)
     def stop_record(self, session_id: UUID):
         '''
-            Stop the current job
+            Stop the current record, works only if the current is still recording
         '''
         self._current_job.abort()
         return self.status(session_id).name
@@ -207,7 +207,7 @@ class Device:
             Validate the last record or invalidate it
         '''
         if not valid:
-            self._records_manager.pop_reccord(session_id)
+            self._records_manager.pop_record(session_id)
         else:
             self._records_manager.validate_record(session_id)
 

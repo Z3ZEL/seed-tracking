@@ -1,6 +1,12 @@
 from numpy import ndarray
 from interfaces.image_processing import Processor
 import cv2
+### This is the main pipeline of the app BackgroundSubstractionPipeline, you can create
+### your own pipeline by creating a new class that inherits from Processor and import layer (or create new one)
+### it's not an algorithm, so it's not dynamicly imported from the config, you need to manually change it
+### in the actions.calculate.py file.
+
+
 ### Importing layer
 from background_substraction_pipeline.layers.grayscale_layer import GrayScaleLayer
 from background_substraction_pipeline.layers.backgroundremoval_layer import BackgroundRemovalLayer

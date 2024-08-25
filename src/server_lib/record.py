@@ -1,4 +1,8 @@
 class Record:
+    """
+        A record object that contains all the information about a record,
+        you can add your own fields if needed. But don't forget to add them in the server_lib.record_launching.py file.
+    """
     def __init__(self, velocity : float, error_margin : float, plots : list[str], seed_images : list[str], main_seed_number : int, worker_seed_number : int, xz_gap : tuple[int], seed_id : str = None) -> None:
         self._velocity : float = velocity
         self._error_margin : float = error_margin

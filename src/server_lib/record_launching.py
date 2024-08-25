@@ -46,6 +46,11 @@ class RecordLauncher(LoggerThread):
 
 
     def _shooting_picture(self):
+        """
+        Takes a shooting picture with the device. All this job is only for retrieving the images
+        Raises:
+            DeviceRecordException: If an issue occurs during recording or if the captured window is too small.
+        """
         from server_lib.device import DeviceStatus
 
         self._device.change_status(DeviceStatus.RECORDING)
@@ -69,6 +74,12 @@ class RecordLauncher(LoggerThread):
         self._s_paths = s_paths
 
     def _calculate(self):
+        """
+        Calculate the real-world position, velocity, and other parameters of the seed launch.
+        Raises:
+            DeviceRecordException: If there is an error during the computation of seed world positions,
+                gap computing, or seed velocity computing.
+        """
         from server_lib.device import DeviceStatus
 
         self._device.change_status(DeviceStatus.COMPUTING)
