@@ -1,3 +1,5 @@
+**Fork from University of Canterbury [Seed Tracking Project](https://eng-git.canterbury.ac.nz/fgi18/seed-tracking)**
+
 # Seed Tracker
 
 - [Seed Tracker](#seed-tracker)
